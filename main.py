@@ -2,13 +2,25 @@ import customtkinter as ctk
 import platform, subprocess as sp, json, os
 
 # Commands Definition
+global config
 commands = open('commands.json', 'r').read()
 commands = json.loads(commands)
-# Config Definition
-global config
-cFile = open('config.json', 'r')
-config = json.loads(cFile.read())
-cFile.close()
+
+# Config Creation
+def read_config():
+    cFile = open('config.json', 'r')
+    config = json.loads(cFile.read())
+    cFile.close()
+    return config
+try:
+    read_config()
+except FileNotFoundError:
+    cFile = open('config.json', 'w')
+    cFile.write('{\n    "local_folder":"./",\n    "remote_folder":"/",\n    "server_user":"user",\n    "server_ip":"0.0.0.0",\n    "server_port":"22"\n}')
+    cFile.close()
+    read_config()
+
+config = read_config()
 
 # Main Application
 app = ctk.CTk()
@@ -87,5 +99,5 @@ if system == 'Windows':
     comandos = commands["windows"] 
 elif system == 'Linux':
     comandos = commands["linux"]
-    
+
 app.mainloop()
