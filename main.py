@@ -58,12 +58,12 @@ class SenderFrame(ctk.CTkFrame):
 
     def file_sender(self, local, remote):
         if local == []: return 0
-        for i in local:
-            sp.Popen(comandos["sender"].replace('{port}', config["server_port"]).replace('{local_path}',
-            i).replace('{user}', config["server_user"])
-            .replace('{remote_ip}', config["server_ip"]).replace('{remote_path}'
-            ,f'{config["remote_folder"]}/{remote}')
-            , shell=True)
+        local = " ".join(local)
+        sp.Popen(comandos["sender"].replace('{port}', config["server_port"]).replace('{local_path}',
+        local).replace('{user}', config["server_user"])
+        .replace('{remote_ip}', config["server_ip"]).replace('{remote_path}'
+        ,f'{config["remote_folder"]}/{remote}')
+        , shell=True)
 
 # Receiver Frame
 class ReceiverFrame(ctk.CTkFrame):
