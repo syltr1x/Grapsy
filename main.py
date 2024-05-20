@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import platform, subprocess as sp, json, os
+from tkinterdnd2 import TkinterDnD, DND_FILES
 
 # Commands Definition
 global config
@@ -27,27 +28,42 @@ config = read_config()
 class SenderFrame(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
+        self.file_list = []
 
-        files = os.listdir(config["local_folder"])
-        if config["local_folder"] == './':
-            files.remove('commands.json')
-            files.remove('config.json')
-            files.remove('main.py')
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=0)
 
-        self.send_options = ctk.CTkComboBox(self, values=files)
-        self.send_options.grid(row=0, column=0)
+        self.send_files = TkinterDnD.CTkFrame(self)
+        self.send_files.grid(row=0, column=0, padx=5, pady=5, sticky='nsew')
+        self.send_files.rowconfigure(1, weight=1)
+        self.send_files.columnconfigure(0, weight=1)
+
+        self.text_widget = ctk.CTkLabel(self.send_files, text="Arrastra aquí los archivos")
+        self.text_widget.pack(expand=True)
+        self.text_widget.drop_target_register(DND_FILES)
+        self.text_widget.dnd_bind('<<Drop>>', self.drop)
+
+        self.send_options = ctk.CTkComboBox(self, values=[])
+        self.send_options.grid(row=1, column=0)
         self.send_entry = ctk.CTkEntry(self, placeholder_text="Ruta de destino")
-        self.send_entry.grid(row=0, column=1)
+        self.send_entry.grid(row=1, column=0)
 
-        self.send_btn = ctk.CTkButton(self, text="ENVIAR", command=lambda:(self.file_sender(self.send_options.get(), self.send_entry.get())))
+        self.send_btn = ctk.CTkButton(self, text="ENVIAR", command=lambda:(self.file_sender(self.file_list, self.send_entry.get())))
         self.send_btn.grid(row=1, column=0, padx=5, pady=10, columnspan=2, sticky='new')
 
-    def file_sender(local, remote):
-        sp.Popen(comandos["sender"].replace('{port}', config["server_port"]).replace('{local_path}',
-        f'{config["local_folder"]}/{local}').replace('{user}', config["server_user"])
-        .replace('{remote_ip}', config["server_ip"]).replace('{remote_path}'
-        ,f'{config["remote_folder"]}/{remote}')
-        , shell=True)
+    def drop(self, event):
+        self.file_list = event.data.split()
+        self.file_paths = '\n'.join(self.file_list)
+        self.text_widget.configure(state='disabled', text=self.file_paths)
+
+    def file_sender(self, local, remote):
+        if local == []: return 0
+        for i in local:
+            sp.Popen(comandos["sender"].replace('{port}', config["server_port"]).replace('{local_path}',
+            i).replace('{user}', config["server_user"])
+            .replace('{remote_ip}', config["server_ip"]).replace('{remote_path}'
+            ,f'{config["remote_folder"]}/{remote}')
+            , shell=True)
 
 # Receiver Frame
 class ReceiverFrame(ctk.CTkFrame):
