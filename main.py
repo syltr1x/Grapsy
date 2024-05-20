@@ -52,7 +52,8 @@ class SenderFrame(ctk.CTkFrame):
         self.send_btn.grid(row=1, column=0, padx=5, pady=10, columnspan=2, sticky='new')
 
     def drop(self, event):
-        self.file_list = event.data.split()
+        if event.data.count('{') >= 1: self.file_list = [f'"{i}"' for i in event.data.replace('} {', '$_._$').replace('}', '').replace('{', '').split('$_._$')]
+        else: self.file_list = event.data.split()
         self.file_paths = '\n'.join(self.file_list)
         self.text_widget.configure(state='disabled', text=self.file_paths)
 
