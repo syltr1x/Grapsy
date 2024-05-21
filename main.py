@@ -52,8 +52,17 @@ class SenderFrame(ctk.CTkFrame):
         self.send_btn.grid(row=1, column=0, padx=5, pady=10, columnspan=2, sticky='new')
 
     def drop(self, event):
-        if event.data.count('{') >= 1: self.file_list = [f'"{i}"' for i in event.data.replace('} {', '$_._$').replace('}', '').replace('{', '').split('$_._$')]
-        else: self.file_list = event.data.split()
+        if event.data.count('{') >= 1:
+            closing_bracket_index = event.data.find('}')
+            split_index = closing_bracket_index + 1
+            while split_index < len(event.data) and event.data[split_index] == ' ':
+                split_index += 1
+            part1 = event.data[:split_index].strip()
+            part2 = event.data[split_index:].strip()
+            files = [part1, part2]
+            self.file_list = [i.replace('}', '"').replace('{', '"') for i in files if len(i) > 0]
+        else:
+            self.file_list = event.data.split()
         self.file_paths = '\n'.join(self.file_list)
         self.text_widget.configure(state='disabled', text=self.file_paths)
 
@@ -89,19 +98,34 @@ class ConfigFrame(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
-        self.local_entry = ctk.CTkEntry(self, placeholder_text="Directorio Local")
-        self.local_entry.grid(row=0, column=0)
-        self.remote_entry = ctk.CTkEntry(self, placeholder_text="Directorio Remoto")
-        self.remote_entry.grid(row=0, column=1)
-        self.user_entry = ctk.CTkEntry(self, placeholder_text="Usuario del Servidor")
-        self.user_entry.grid(row=1, column=0)
-        self.ip_entry = ctk.CTkEntry(self, placeholder_text="Ip del Servidor")
-        self.ip_entry.grid(row=1, column=1)
-        self.port_entry = ctk.CTkEntry(self, placeholder_text="Puerto del Servidor")
-        self.port_entry.grid(row=2, column=0)
+        self.local_label = ctk.CTkLabel(self, text="Direcotrio Local")
+        self.local_label.grid(row=0, column=0, padx=5, pady=5)
+        self.local_entry = ctk.CTkEntry(self, placeholder_text=config["local_folder"])
+        self.local_entry.grid(row=0, column=1, padx=5, pady=5)
+        
+        self.remote_label = ctk.CTkLabel(self, text="Directorio Remoto")
+        self.remote_label.grid(row=1, column=0, padx=5, pady=5)
+        self.remote_entry = ctk.CTkEntry(self, placeholder_text=config["remote_folder"])
+        self.remote_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        self.user_label = ctk.CTkLabel(self, text="Usuario del Servidor")
+        self.user_label.grid(row=2, column=0, padx=5, pady=5)
+        self.user_entry = ctk.CTkEntry(self, placeholder_text=config["server_user"])
+        self.user_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        self.ip_label = ctk.CTkLabel(self, text="Ip del Servidor")
+        self.ip_label.grid(row=3, column=0, padx=5, pady=5)
+        self.ip_entry = ctk.CTkEntry(self, placeholder_text=config["server_ip"])
+        self.ip_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        self.port_label = ctk.CTkLabel(self, text="Puerto del Servidor")
+        self.port_label.grid(row=4, column=0, padx=5, pady=5)
+        self.port_entry = ctk.CTkEntry(self, placeholder_text=config["server_port"])
+        self.port_entry.grid(row=4, column=1, padx=5, pady=5)
+
         self.config_sub_btn = ctk.CTkButton(self, text="Aplicar Configuracion", command=lambda:(self.save_config(self.local_entry.get(),
                 self.remote_entry.get(), self.user_entry.get(), self.ip_entry.get(), self.port_entry.get())))
-        self.config_sub_btn.grid(row=2, column=1)
+        self.config_sub_btn.grid(row=5, column=1, padx=5, pady=5)
 
     def save_config(local, remote, user, ip, port):
         if not local != '': local = config["local_folder"]
