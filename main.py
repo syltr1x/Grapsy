@@ -3,26 +3,23 @@ import platform, subprocess as sp, json, os
 from tkinterdnd2 import TkinterDnD, DND_FILES
 
 # Commands Definition
-global config
 global comandos
 commands = open('commands.json', 'r').read()
 commands = json.loads(commands)
 
 # Config Creation
-def read_config():
+def set_config():
+    global config
     cFile = open('config.json', 'r')
     config = json.loads(cFile.read())
     cFile.close()
-    return config
 try:
-    read_config()
+    set_config()
 except FileNotFoundError:
     cFile = open('config.json', 'w')
     cFile.write('{\n    "local_folder":"./",\n    "remote_folder":"/",\n    "server_user":"user",\n    "server_ip":"0.0.0.0",\n    "server_port":"22"\n}')
     cFile.close()
-    read_config()
-
-config = read_config()
+    set_config()
 
 # Sender Frame
 class SenderFrame(ctk.CTkFrame):
@@ -127,7 +124,7 @@ class ConfigFrame(ctk.CTkFrame):
                 self.remote_entry.get(), self.user_entry.get(), self.ip_entry.get(), self.port_entry.get())))
         self.config_sub_btn.grid(row=5, column=1, padx=5, pady=5)
 
-    def save_config(local, remote, user, ip, port):
+    def save_config(self, local, remote, user, ip, port):
         if not local != '': local = config["local_folder"]
         if not remote != '': remote = config["remote_folder"]
         if not user != '': user = config["server_user"]
@@ -136,6 +133,12 @@ class ConfigFrame(ctk.CTkFrame):
         cFile = open('config.json', 'w')
         cFile.write('{\n'+f'    "local_folder":"{local}",\n    "remote_folder":"{remote}",\n    "server_user":"{user}",\n    "server_ip":"{ip}",\n    "server_port":"{port}"'+'\n}')
         cFile.close()
+        set_config()
+        self.local_entry.configure(placeholder_text=config["local_folder"])
+        self.remote_entry.configure(placeholder_text=config["remote_folder"])
+        self.user_entry.configure(placeholder_text=config["server_user"])
+        self.ip_entry.configure(placeholder_text=config["server_ip"])
+        self.port_entry.configure(placeholder_text=config["server_port"])
 
 # Main Application
 class App(ctk.CTk):
@@ -194,6 +197,7 @@ class App(ctk.CTk):
     def config_button_event(self):
         self.select_frame_by_name("config")
 
+set_config()
 system = platform.system()
 if system == 'Windows':
     comandos = commands["windows"] 
