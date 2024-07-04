@@ -2,11 +2,6 @@ import customtkinter as ctk
 import platform, subprocess as sp, json, os
 from tkinterdnd2 import TkinterDnD, DND_FILES
 
-# Commands Definition
-global comandos
-commands = open('commands.json', 'r').read()
-commands = json.loads(commands)
-
 # Config Creation
 def set_config():
     global config
@@ -198,11 +193,19 @@ class App(ctk.CTk):
         self.select_frame_by_name("config")
 
 set_config()
+
+# Commands Definition
 system = platform.system()
 if system == 'Windows':
-    comandos = commands["windows"] 
+    comandos = {
+        "sender":"scp -P {port} {local_path} {user}@{remote_ip}:{remote_path}",
+        "receiver":"scp -P {port} {user}@{remote_ip}:{remote_path} {local_path}"
+    }
 elif system == 'Linux':
-    comandos = commands["linux"]
+    comandos = {
+        "sender":"cat {local_path} | ssh -p {port} {user}@{remote_ip} 'cat > {remote_path}'",
+        "receiver":"ssh {user}@{remote_ip} -p {port} 'cat {remote_path}' > {local_path}"
+    }
 
 app = App()
 app.mainloop()
