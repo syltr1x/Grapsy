@@ -1,4 +1,4 @@
-## Powerhsell
+## Windows (Powershell)
 
 [!] Abrir powershell como administrador (INSTALACION NECESARIA)
 > Add-WindowsCapability -Online -Name OpenSSH.Client*
