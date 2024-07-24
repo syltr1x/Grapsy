@@ -73,7 +73,6 @@ fn read_config() -> std::io::Result<Config> {
         stdout().flush()?;
         stdin().read_line(&mut remote_path)?;
 
-        // Format local and remote post
         if local_path.ends_with("/") {
             local_path.pop();
         }
@@ -132,7 +131,8 @@ fn compress_file(input_path: &str) -> std::io::Result<()> {
 fn decompress_file(input_path: &str) -> io::Result<()> {
     let input_file = File::open(input_path)?;
     let mut input_reader = io::BufReader::new(input_file);
-    let output_file = File::create(brotli_path(input_path))?;
+    let output_path = input_path.strip_suffix(".brotli").unwrap_or(input_path);
+    let output_file = File::create(output_path)?;
     let mut output_writer = io::BufWriter::new(output_file);
 
     // Crear un descompresor Brotli
@@ -227,7 +227,8 @@ fn main() -> Result<()> {
             print!("Local file (with ext) >> ");
             stdout().flush()?;
             stdin().read_line(&mut input_path)?;
-            let input_path = input_path.trim();
+            let mut input_path = input_path.trim().to_owned();
+            input_path = input_path+".brotli";
 
             let mut remote_path = format!("{}/{}", config.remote_path.trim().to_string(), remote_file);
             remote_path = remote_path+".brotli";
@@ -236,8 +237,8 @@ fn main() -> Result<()> {
             let remote_port = config.port;
             let user = &config.user;
 
-            receive_file(input_path, &remote_path, remote_host, user, remote_port)?;
-            decompress_file(input_path)?;
+            receive_file(&input_path, &remote_path, remote_host, user, remote_port)?;
+            decompress_file(&input_path)?;
         }
     } else if action == "2" {
         let config = read_config()?;
