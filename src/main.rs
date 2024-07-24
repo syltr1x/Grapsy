@@ -1,8 +1,8 @@
 use std::process::Command;
-use std::fs::File;
-use std::io::{self, stdin, stdout, BufReader, BufWriter, Read, Result, Write, BufRead};
+use std::fs::{File, remove_file, write};
+use std::io::{stdin, stdout, BufReader, BufWriter, Read, Result, Write, BufRead, ErrorKind, Error};
 use brotli::{Decompressor, CompressorWriter};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 struct Config {
     user: String,
@@ -93,33 +93,17 @@ fn read_config() -> std::io::Result<Config> {
     }
 }
 
-fn brotli_path(input_path: &str) -> PathBuf {
-    let input_path = Path::new(input_path);
 
-    let mut output_path = if input_path.is_dir() {
-        input_path.with_file_name(input_path.file_name().unwrap_or_default())
-    } else {
-        input_path.to_path_buf()
-    };
-
-    if output_path.ends_with("/") {
-        output_path.pop();
-    }
-
-    output_path.set_extension("brotli");
-    output_path
-}
-
-fn compress_file(input_path: &str) -> std::io::Result<()> {
+fn compress_file(input_path: &str) -> Result<()> {
     let input_file = File::open(input_path)?;
     let mut input_reader = BufReader::new(input_file);
-    let output_file = File::create(brotli_path(input_path))?;
+
+    let output_path = format!("{}.brotli", input_path);
+    let output_file = File::create(&output_path)?;
     let mut output_writer = BufWriter::new(output_file);
 
-    // Configure the Brotli compressor
     let mut compressor = CompressorWriter::new(&mut output_writer, 4096, 11, 22);
 
-    // Read data from the input file and write it to the compressor
     let mut buffer = Vec::new();
     input_reader.read_to_end(&mut buffer)?;
     compressor.write_all(&buffer)?;
@@ -128,12 +112,12 @@ fn compress_file(input_path: &str) -> std::io::Result<()> {
     Ok(())
 }
 
-fn decompress_file(input_path: &str) -> io::Result<()> {
+fn decompress_file(input_path: &str) -> Result<()> {
     let input_file = File::open(input_path)?;
-    let mut input_reader = io::BufReader::new(input_file);
+    let mut input_reader = BufReader::new(input_file);
     let output_path = input_path.strip_suffix(".brotli").unwrap_or(input_path);
     let output_file = File::create(output_path)?;
-    let mut output_writer = io::BufWriter::new(output_file);
+    let mut output_writer = BufWriter::new(output_file);
 
     // Crear un descompresor Brotli
     let mut decompressor = Decompressor::new(&mut input_reader, 4096);
@@ -150,9 +134,10 @@ fn decompress_file(input_path: &str) -> io::Result<()> {
     Ok(())
 }
 
-fn send_file_in_chunks(local_path: &str, remote_path: &str, remote_host: &str, user: &str, remote_port: u16) -> io::Result<()> {
-    let file = File::open(brotli_path(local_path))?;
-    let mut reader = BufReader::new(file);
+fn send_file_in_chunks(input_path: &str, remote_path: &str, remote_host: &str, user: &str, remote_port: u16) -> Result<()> {
+    let local_path = format!("{}.brotli", input_path);
+    let input_file = File::open(local_path)?;
+    let mut reader = BufReader::new(input_file);
 
     let mut comm = Command::new("ssh")
         .arg(format!("-p {}", remote_port))
@@ -162,7 +147,7 @@ fn send_file_in_chunks(local_path: &str, remote_path: &str, remote_host: &str, u
         .spawn()?;
 
     // Obtener el manejador de la entrada estándar del proceso SSH
-    let stdin = comm.stdin.as_mut().ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Failed to open stdin"))?;
+    let stdin = comm.stdin.as_mut().ok_or_else(|| Error::new(ErrorKind::Other, "Failed to open stdin"))?;
 
     // Leer el archivo y escribir en el stdin del comando SSH
     let mut buffer = [0; 4096];
@@ -179,9 +164,7 @@ fn send_file_in_chunks(local_path: &str, remote_path: &str, remote_host: &str, u
     Ok(())
 }
 
-fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &str, remote_port: u16) -> io::Result<()> {
-    println!("ssh {}@{} -p {} cat {} > {}", user, remote_host, remote_port, remote_path, local_path);
-
+fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &str, remote_port: u16) -> Result<()> {
     let status = Command::new("ssh")
         .arg(format!("{}@{}", user, remote_host))
         .arg(format!("-p {}", remote_port))
@@ -189,11 +172,10 @@ fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &s
         .output()?; // Captura la salida del comando
 
     if status.status.success() {
-        // Escribe la salida en el archivo local
-        std::fs::write(local_path, status.stdout)?;
+        write(local_path, status.stdout)?;
     } else {
         eprintln!("Error: {}", String::from_utf8_lossy(&status.stderr));
-        return Err(io::Error::new(io::ErrorKind::Other, "Failed to execute command"));
+        return Err(Error::new(ErrorKind::Other, "Failed to execute command"));
     }
 
     Ok(())
@@ -201,7 +183,7 @@ fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &s
 }
 
 fn main() -> Result<()> {
-    println!("\x1b[31m[0]\x1b[0m Exit\n\x1b[33m[1]\x1b[0m Download    \x1b[33m[2]\x1b[0m Upload\n\x1b[33m[3]\x1b[0m Config");
+    println!("\x1b[31m[0]\x1b[0m Exit\n\x1b[33m[1]\x1b[0m Download    \x1b[33m[2]\x1b[0m Upload\n\x1b[33m[3]\x1b[0m Config \n\x1b[33m[4]\x1b[0m Configure server");
     let mut action = String::new();
     print!("Option >> ");
     stdout().flush()?;
@@ -219,19 +201,19 @@ fn main() -> Result<()> {
             .arg(format!("ls {}", config.remote_path.trim()))
             .status()?;
         if status.success() {
-            print!("\nRemote file (without ext) >> ");
+            print!("\nRemote file (without .brotli) >> ");
             stdout().flush()?;
             stdin().read_line(&mut remote_file)?;
             let remote_file = remote_file.trim();
 
-            print!("Local file (with ext) >> ");
+            print!("Local file (without ext) >> ");
             stdout().flush()?;
             stdin().read_line(&mut input_path)?;
             let mut input_path = input_path.trim().to_owned();
-            input_path = input_path+".brotli";
+            let input_file = Path::new(remote_file).extension().unwrap_or_default().to_str().unwrap_or_default();
+            input_path = format!("{}.{}.brotli", input_path, input_file);
 
-            let mut remote_path = format!("{}/{}", config.remote_path.trim().to_string(), remote_file);
-            remote_path = remote_path+".brotli";
+            let remote_path = format!("{}/{}.brotli", config.remote_path.trim().to_string(), remote_file);
 
             let remote_host = &config.host;
             let remote_port = config.port;
@@ -239,13 +221,14 @@ fn main() -> Result<()> {
 
             receive_file(&input_path, &remote_path, remote_host, user, remote_port)?;
             decompress_file(&input_path)?;
+            remove_file(input_path)?;
         }
     } else if action == "2" {
         let config = read_config()?;
         let remote_host = config.host;
         let remote_port = config.port;
         let mut input_path = String::new();
-        let mut remote_path = String::new();
+        let remote_path: String; 
 
         if config.local_path == "" {
             print!("Local file path (with ext) >> ");
@@ -260,16 +243,18 @@ fn main() -> Result<()> {
         }
 
         if config.remote_path == "" {
-            print!("Remote file path (without ext) >> ");
+            let mut file_path = String::new();
+            print!("Remote path (no file) >> ");
             stdout().flush()?;
-            stdin().read_line(&mut remote_path)?;
-            remote_path = remote_path+".brotli";
+            stdin().read_line(&mut file_path)?;
+            if file_path.ends_with("/") {file_path.to_string().pop();} // remove '/' if this exist
+            let input_filepath: Vec<&str> = input_path.split("/").collect();
+            let input_filename = input_filepath.last().unwrap();
+            remote_path = format!("{}/{}.brotli", file_path, input_filename.trim()); 
         } else {
-            let mut file_name = String::new();
-            print!("Remote filename (without ext) >> ");
-            stdout().flush()?;
-            stdin().read_line(&mut file_name)?;
-            remote_path = format!("{}/{}.brotli", config.remote_path, file_name.trim());
+            let input_filepath: Vec<&str> = input_path.split("/").collect();
+            let input_filename = input_filepath.last().unwrap();
+            remote_path = format!("{}/{}.brotli", config.remote_path, input_filename.trim());
         }
 
         let input_path = input_path.trim();
@@ -277,12 +262,24 @@ fn main() -> Result<()> {
 
         compress_file(input_path)?;
         println!("File compressed successfully!");
+        remove_file(input_path)?;
 
         send_file_in_chunks(input_path, remote_path, &remote_host, &config.user, remote_port)?;
         println!("File sent succesfully!");
+        remove_file(format!("{}.brotli", input_path))?;
     } else if action == "3" {
         let config = read_config()?;
         println!("user: {}host:{}port:{}\nlocal:{}remote:{}", config.user, config.host, config.port, config.local_path, config.remote_path);
+    } else if action == "4" {
+        let mut comment_key = String::new();
+        print!("Comment for ssh (can be empty >> ");
+        stdout().flush()?;
+        stdin().read_line(&mut comment_key)?;
+        let _comm = Command::new("ssh-keygen")
+            .arg(format!("-t rsa"))
+            .arg(format!("-b 4086"))
+            .arg(format!("-C '{}'", comment_key.to_string()))
+            .spawn();
     } else {
         println!("[-] Err: {} is invalid option.", action);
     }
