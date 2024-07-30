@@ -93,7 +93,6 @@ fn read_config() -> std::io::Result<Config> {
     }
 }
 
-
 fn compress_file(input_path: &str) -> Result<()> {
     let input_file = File::open(input_path)?;
     let mut input_reader = BufReader::new(input_file);
@@ -159,7 +158,6 @@ fn send_file_in_chunks(input_path: &str, remote_path: &str, remote_host: &str, u
         print!("{:02x} ", bytes_read);
         stdin.write_all(&buffer[..bytes_read])?;
     }
-
     comm.wait()?;
     Ok(())
 }
@@ -177,111 +175,120 @@ fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &s
         eprintln!("Error: {}", String::from_utf8_lossy(&status.stderr));
         return Err(Error::new(ErrorKind::Other, "Failed to execute command"));
     }
-
     Ok(())
-
 }
 
 fn main() -> Result<()> {
-    println!("\x1b[31m[0]\x1b[0m Exit\n\x1b[33m[1]\x1b[0m Download    \x1b[33m[2]\x1b[0m Upload\n\x1b[33m[3]\x1b[0m Config \n\x1b[33m[4]\x1b[0m Configure server");
-    let mut action = String::new();
-    print!("Option >> ");
-    stdout().flush()?;
-    stdin().read_line(&mut action)?;
-    let action = action.trim();
-
-    if action == "1" {
-        let mut remote_file = String::new();
-        let mut input_path = String::new();
-        let config = read_config()?;
-
-        let status = Command::new("ssh")
-            .arg(format!("{}@{}", config.user, config.host))
-            .arg(format!("-p {}", config.port))
-            .arg(format!("ls {}", config.remote_path.trim()))
-            .status()?;
-        if status.success() {
-            print!("\nRemote file (without .brotli) >> ");
-            stdout().flush()?;
-            stdin().read_line(&mut remote_file)?;
-            let remote_file = remote_file.trim();
-
-            print!("Local file (without ext) >> ");
-            stdout().flush()?;
-            stdin().read_line(&mut input_path)?;
-            let mut input_path = input_path.trim().to_owned();
-            let input_file = Path::new(remote_file).extension().unwrap_or_default().to_str().unwrap_or_default();
-            input_path = format!("{}.{}.brotli", input_path, input_file);
-
-            let remote_path = format!("{}/{}.brotli", config.remote_path.trim().to_string(), remote_file);
-
-            let remote_host = &config.host;
-            let remote_port = config.port;
-            let user = &config.user;
-
-            receive_file(&input_path, &remote_path, remote_host, user, remote_port)?;
-            decompress_file(&input_path)?;
-            remove_file(input_path)?;
-        }
-    } else if action == "2" {
-        let config = read_config()?;
-        let remote_host = config.host;
-        let remote_port = config.port;
-        let mut input_path = String::new();
-        let remote_path: String; 
-
-        if config.local_path == "" {
-            print!("Local file path (with ext) >> ");
-            stdout().flush()?;
-            stdin().read_line(&mut input_path)?;
-        } else {
-            let mut file_name = String::new();
-            print!("Local filename (with ext) >> ");
-            stdout().flush()?;
-            stdin().read_line(&mut file_name)?;
-            input_path = format!("{}/{}", config.local_path, file_name);
-        }
-
-        if config.remote_path == "" {
-            let mut file_path = String::new();
-            print!("Remote path (no file) >> ");
-            stdout().flush()?;
-            stdin().read_line(&mut file_path)?;
-            if file_path.ends_with("/") {file_path.to_string().pop();} // remove '/' if this exist
-            let input_filepath: Vec<&str> = input_path.split("/").collect();
-            let input_filename = input_filepath.last().unwrap();
-            remote_path = format!("{}/{}.brotli", file_path, input_filename.trim()); 
-        } else {
-            let input_filepath: Vec<&str> = input_path.split("/").collect();
-            let input_filename = input_filepath.last().unwrap();
-            remote_path = format!("{}/{}.brotli", config.remote_path, input_filename.trim());
-        }
-
-        let input_path = input_path.trim();
-        let remote_path = remote_path.trim();
-
-        compress_file(input_path)?;
-        println!("File compressed successfully!");
-        remove_file(input_path)?;
-
-        send_file_in_chunks(input_path, remote_path, &remote_host, &config.user, remote_port)?;
-        println!("File sent succesfully!");
-        remove_file(format!("{}.brotli", input_path))?;
-    } else if action == "3" {
-        let config = read_config()?;
-        println!("user: {}host:{}port:{}\nlocal:{}remote:{}", config.user, config.host, config.port, config.local_path, config.remote_path);
-    } else if action == "4" {
-        let mut comment_key = String::new();
-        print!("Comment for ssh (can be empty >> ");
+    'main_loop: loop {
+        println!("\x1b[31m[0]\x1b[0m Exit\n\x1b[33m[1]\x1b[0m Download    \x1b[33m[2]\x1b[0m Upload\n\x1b[33m[3]\x1b[0m Config \n\x1b[33m[4]\x1b[0m Configure server");
+        let mut action = String::new();
+        print!("Option >> ");
         stdout().flush()?;
-        stdin().read_line(&mut comment_key)?;
-        let _comm = Command::new("ssh-keygen")
-            .arg(format!("-t rsa"))
-            .arg(format!("-b 4086"))
-            .arg(format!("-C '{}'", comment_key.to_string()))
-            .spawn();
-    } else {
-        println!("[-] Err: {} is invalid option.", action);
+        stdin().read_line(&mut action)?;
+        let action = action.trim();
+
+        if action == "0" {
+            break 'main_loop
+        } else if action == "1" {
+            let mut remote_file = String::new();
+            let mut input_path = String::new();
+            let config = read_config()?;
+
+            let status = Command::new("ssh")
+                .arg(format!("{}@{}", config.user, config.host))
+                .arg(format!("-p {}", config.port))
+                .arg(format!("ls {}", config.remote_path.trim()))
+                .status()?;
+            if status.success() {
+                print!("\nRemote file (without .brotli) >> ");
+                stdout().flush()?;
+                stdin().read_line(&mut remote_file)?;
+                let remote_file = remote_file.trim();
+
+                if config.local_path == "" {
+                    print!("Local file path (without ext) >> ");
+                    stdout().flush()?;
+                    stdin().read_line(&mut input_path)?;
+                } else {
+                    println!("Save in: {}", config.local_path.trim());
+                    print!("Local file (without ext) >> ");
+                    stdout().flush()?;
+                    stdin().read_line(&mut input_path)?;
+                }
+                let mut input_path = input_path.trim().to_owned();
+                let input_file = Path::new(remote_file).extension().unwrap_or_default().to_str().unwrap_or_default();
+                input_path = format!("{}.{}.brotli", input_path, input_file);
+
+                let remote_path = format!("{}/{}.brotli", config.remote_path.trim().to_string(), remote_file);
+
+                let remote_host = &config.host;
+                let remote_port = config.port;
+                let user = &config.user;
+
+                receive_file(&input_path, &remote_path, remote_host, user, remote_port)?;
+                decompress_file(&input_path)?;
+                remove_file(input_path)?;
+            }
+        } else if action == "2" {
+            let config = read_config()?;
+            let remote_host = config.host;
+            let remote_port = config.port;
+            let mut input_path = String::new();
+            let remote_path: String; 
+
+            if config.local_path == "" {
+                print!("Local file path (with ext) >> ");
+                stdout().flush()?;
+                stdin().read_line(&mut input_path)?;
+            } else {
+                let mut file_name = String::new();
+                print!("Local filename (with ext) >> ");
+                stdout().flush()?;
+                stdin().read_line(&mut file_name)?;
+                input_path = format!("{}/{}", config.local_path, file_name);
+            }
+
+            if config.remote_path == "" {
+                let mut file_path = String::new();
+                print!("Remote path (no file) >> ");
+                stdout().flush()?;
+                stdin().read_line(&mut file_path)?;
+                if file_path.ends_with("/") {file_path.to_string().pop();} // remove '/' if this exist
+                let input_filepath: Vec<&str> = input_path.split("/").collect();
+                let input_filename = input_filepath.last().unwrap();
+                remote_path = format!("{}/{}.brotli", file_path, input_filename.trim()); 
+            } else {
+                let input_filepath: Vec<&str> = input_path.split("/").collect();
+                let input_filename = input_filepath.last().unwrap();
+                remote_path = format!("{}/{}.brotli", config.remote_path, input_filename.trim());
+            }
+
+            let input_path = input_path.trim();
+            let remote_path = remote_path.trim();
+
+            compress_file(input_path)?;
+            println!("File compressed successfully!");
+            remove_file(input_path)?;
+
+            send_file_in_chunks(input_path, remote_path, &remote_host, &config.user, remote_port)?;
+            println!("File sent succesfully!");
+            remove_file(format!("{}.brotli", input_path))?;
+        } else if action == "3" {
+            let config = read_config()?;
+            println!("user: {}host:{}port:{}\nlocal:{}remote:{}", config.user, config.host, config.port, config.local_path, config.remote_path);
+        } else if action == "4" {
+            let mut comment_key = String::new();
+            print!("Comment for ssh (can be empty >> ");
+            stdout().flush()?;
+            stdin().read_line(&mut comment_key)?;
+            let _comm = Command::new("ssh-keygen")
+                .arg(format!("-t rsa"))
+                .arg(format!("-b 4086"))
+                .arg(format!("-C '{}'", comment_key.to_string()))
+                .spawn();
+        } else {
+            println!("[-] Err: {} is invalid option.", action);
+        }
     }
     Ok(())
 }
