@@ -180,7 +180,7 @@ fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &s
 
 fn main() -> Result<()> {
     'main_loop: loop {
-        println!("\x1b[31m[0]\x1b[0m Exit\n\x1b[33m[1]\x1b[0m Download    \x1b[33m[2]\x1b[0m Upload\n\x1b[33m[3]\x1b[0m Config \n\x1b[33m[4]\x1b[0m Configure server");
+        println!("\x1b[31m[0]\x1b[0m Exit\n\x1b[33m[1]\x1b[0m Download    \x1b[33m[2]\x1b[0m Upload\n\x1b[33m[3]\x1b[0m Config parameters \n\x1b[33m[4]\x1b[0m Config server");
         let mut action = String::new();
         print!("Option >> ");
         stdout().flush()?;
@@ -277,14 +277,20 @@ fn main() -> Result<()> {
             let config = read_config()?;
             println!("user: {}host:{}port:{}\nlocal:{}remote:{}", config.user, config.host, config.port, config.local_path, config.remote_path);
         } else if action == "4" {
+            let config = read_config()?;
             let mut comment_key = String::new();
             print!("Comment for ssh (can be empty >> ");
             stdout().flush()?;
             stdin().read_line(&mut comment_key)?;
-            let _comm = Command::new("ssh-keygen")
+            let _create_key = Command::new("ssh-keygen")
                 .arg(format!("-t rsa"))
                 .arg(format!("-b 4086"))
                 .arg(format!("-C '{}'", comment_key.to_string()))
+                .arg(format!("-f ~/.ssh/{}-server", config.user))
+                .spawn();
+            let _send_key = Command::new("ssh-copy-id")
+                .arg(format!("-i ~/.ssh/{}-server-pub", config.user))
+                .arg(format!("{}@{}", config.user, config.host))
                 .spawn();
         } else {
             println!("[-] Err: {} is invalid option.", action);
