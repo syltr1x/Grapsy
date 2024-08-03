@@ -1,3 +1,4 @@
+use dirs;
 use std::process::Command;
 use std::fs::{File, remove_file, write};
 use std::io::{stdin, stdout, BufReader, BufWriter, Read, Result, Write, BufRead, ErrorKind, Error};
@@ -278,20 +279,21 @@ fn main() -> Result<()> {
             println!("user: {}host:{}port:{}\nlocal:{}remote:{}", config.user, config.host, config.port, config.local_path, config.remote_path);
         } else if action == "4" {
             let config = read_config()?;
+            let home_dir = dirs::home_dir().expect("Error msg");
             let mut comment_key = String::new();
-            print!("Comment for ssh (can be empty >> ");
+            print!("Comment for ssh (can be empty) >> ");
             stdout().flush()?;
             stdin().read_line(&mut comment_key)?;
             let _create_key = Command::new("ssh-keygen")
-                .arg(format!("-t rsa"))
-                .arg(format!("-b 4086"))
-                .arg(format!("-C '{}'", comment_key.to_string()))
-                .arg(format!("-f ~/.ssh/{}-server", config.user))
-                .spawn();
+                .arg(format!("-trsa"))
+                .arg(format!("-b4096"))
+                .arg(format!("-C'{}'", comment_key.to_string()))
+                .arg(format!("-f{}/.ssh/{}-server", home_dir.display(), config.user))
+                .status()?;
             let _send_key = Command::new("ssh-copy-id")
-                .arg(format!("-i ~/.ssh/{}-server-pub", config.user))
+                .arg(format!("-i{}/.ssh/{}-server.pub", home_dir.display(), config.user))
                 .arg(format!("{}@{}", config.user, config.host))
-                .spawn();
+                .status()?;
         } else {
             println!("[-] Err: {} is invalid option.", action);
         }
