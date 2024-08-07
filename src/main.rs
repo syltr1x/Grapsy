@@ -226,8 +226,12 @@ fn main() -> Result<()> {
                 let remote_port = config.port;
                 let user = &config.user;
 
+                println!("\x1b[33m[*]\x1b[0m Receiving file...");
                 receive_file(&input_path, &remote_path, remote_host, user, remote_port)?;
+                println!("\x1b[32m[+]\x1b[0m File received!");
+                println!("\x1b[33m[*]\x1b[0m Decompressing file...");
                 decompress_file(&input_path)?;
+                println!("\x1b[32[+]\x1b[0m File decompressed!");
                 remove_file(input_path)?;
             }
         } else if action == "2" {
@@ -266,10 +270,12 @@ fn main() -> Result<()> {
 
             let input_path = input_path.trim();
             let remote_path = remote_path.trim();
-
+            println!("\x1b[33m[*]\x1b[0m Compressing file...");
             compress_file(input_path)?;
-            println!("File compressed successfully!");
+            println!("\x1b[32m[+]\x1b[0m File compressed successfully!");
+            println!("\x1b[33m[*]\x1b[0m Sending file...");
             remove_file(input_path)?;
+            println!("\x1b[32m[+]\x1b[0m File sent succesfully!");
 
             send_file_in_chunks(input_path, remote_path, &remote_host, &config.user, remote_port)?;
             println!("File sent succesfully!");
