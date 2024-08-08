@@ -1,5 +1,9 @@
 ## Cian
 A rust-based CLI app for compress and transfer files to server using SCP (Secure Copy Protocol)
 
-### Next Version app (0.4)
-* GUI Application (using tauri)
+### Requiisites to v0.5:
+[] Fix some cian-base functions
+[] Improve logs
+[] Improve Frontend functions
+[] Stylize UI
+### Next Version app (0.5) is pending...
