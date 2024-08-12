@@ -1,8 +1,7 @@
-use dirs;
 use std::process::Command;
-use std::fs::{File, remove_file, write};
-use std::io::{stdin, stdout, BufReader, BufWriter, Read, Result, Write, BufRead, ErrorKind, Error};
-use brotli::{Decompressor, CompressorWriter};
+use std::fs::{File, write};
+use std::io::{stdin, stdout, BufReader, Read, Result, Write, BufRead, ErrorKind, Error};
+use zstd::{Encoder, Decoder};
 use std::path::Path;
 
 pub struct Config {
@@ -93,60 +92,58 @@ pub fn read_config() -> std::io::Result<Config> {
         })
     }
 }
-
 pub fn compress_file(input_path: &str) -> Result<()> {
-    let input_file = File::open(input_path)?;
-    let mut input_reader = BufReader::new(input_file);
+    let mut input_file = File::open(input_path)?;
+    let output_file = File::create(format!("{}.zst", input_path))?;
+    let mut encoder = Encoder::new(output_file, 0)?;
     
-    let output_path = format!("{}.brotli", input_path);
-    let output_file = File::create(&output_path)?;
-
-    let mut output_writer = BufWriter::new(output_file);
-    let mut compressor = CompressorWriter::new(&mut output_writer, 4096, 11, 22);
-
-    let mut buffer = [0u8; 4096];
-    input_reader.read(&mut buffer)?;
-    compressor.write(&buffer)?;
-    compressor.flush()?;
+    let mut buffer = [0; 4096];
+    while let Ok(bytes_read) = input_file.read(&mut buffer) {
+        if bytes_read == 0 {
+            break;
+        }
+        encoder.write_all(&buffer[..bytes_read])?;
+    }
+    
+    encoder.finish()?;
     Ok(())
 }
-
 pub fn decompress_file(input_path: &str) -> Result<()> {
     let input_file = File::open(input_path)?;
-    let mut input_reader = BufReader::new(input_file);
-    let output_path = input_path.strip_suffix(".brotli").unwrap_or(input_path);
-    let output_file = File::create(output_path)?;
-    let mut output_writer = BufWriter::new(output_file);
-
-    let mut decompressor = Decompressor::new(&mut input_reader, 4096);
-
-    let mut buffer = [0u8; 4096];
-    loop {
-        match decompressor.read(&mut buffer) {
-            Ok(0) => break,
-            Ok(n) => output_writer.write_all(&buffer[..n])?,
-            Err(e) => return Err(e),
+    let output_path = input_path.strip_suffix(".zst").unwrap_or(input_path);
+    let mut output_file = File::create(output_path)?;
+    let mut decoder = Decoder::new(input_file)?;
+    
+    let mut buffer = [0; 4096];
+    while let Ok(bytes_read) = decoder.read(&mut buffer) {
+        if bytes_read == 0 {
+            break;
         }
+        output_file.write_all(&buffer[..bytes_read])?;
     }
     Ok(())
 }
 
-pub fn send_file_in_chunks(input_path: &str, remote_path: &str, remote_host: &str, user: &str, remote_port: u16) -> Result<()> {
-    let local_path = format!("{}.brotli", input_path);
+pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
+    let config = read_config()?;
+    let remote_port = config.port;
+    let remote_host = config.host;
+    let user = config.user;
+
+    let local_path = input_path.trim();
     let input_file = File::open(local_path)?;
     let mut reader = BufReader::new(input_file);
 
+    println!("ssh -p {} {}@{} cat >> {}", remote_port, user ,remote_host, remote_path.trim());
     let mut comm = Command::new("ssh")
         .arg(format!("-p {}", remote_port))
         .arg(format!("{}@{}", user, remote_host))
-        .arg(format!("cat >> {}", remote_path))
+        .arg(format!("cat >> {}", remote_path.trim()))
         .stdin(std::process::Stdio::piped())
         .spawn()?;
 
-    // Obtener el manejador de la entrada estándar del proceso SSH
     let stdin = comm.stdin.as_mut().ok_or_else(|| Error::new(ErrorKind::Other, "Failed to open stdin"))?;
 
-    // Leer el archivo y escribir en el stdin del comando SSH
     let mut buffer = [0; 4096];
     loop {
         let bytes_read = reader.read(&mut buffer)?;
@@ -160,15 +157,21 @@ pub fn send_file_in_chunks(input_path: &str, remote_path: &str, remote_host: &st
     Ok(())
 }
 
-pub fn receive_file(local_path: &str, remote_path: &str, remote_host: &str, user: &str, remote_port: u16) -> Result<()> {
+pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
+    let config = read_config()?;
+    let remote_port = config.port;
+    let remote_host = config.host;
+    let user = config.user;
+
+    println!("ssh {}@{} -p {} cat >> {}", user, remote_host, remote_port, remote_path.trim());
     let status = Command::new("ssh")
         .arg(format!("{}@{}", user, remote_host))
         .arg(format!("-p {}", remote_port))
-        .arg(format!("cat {}", remote_path)) // Ejecuta 'cat' en el servidor remoto
-        .output()?; // Captura la salida del comando
+        .arg(format!("cat {}", remote_path.trim()))
+        .output()?;
 
     if status.status.success() {
-        write(local_path, status.stdout)?;
+        write(local_path.trim(), status.stdout)?;
     } else {
         eprintln!("Error: {}", String::from_utf8_lossy(&status.stderr));
         return Err(Error::new(ErrorKind::Other, "Failed to execute command"));
