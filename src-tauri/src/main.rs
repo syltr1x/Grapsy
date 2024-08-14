@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 mod cian;
+
+// Commands
 #[tauri::command]
 fn comprimir(directorio: &str) {
     println!("Directorio: {}", directorio);
@@ -15,7 +17,7 @@ fn descomprimir(directorio: &str) {
 #[tauri::command]
 fn enviar(archivo_local: &str, archivo_remoto: &str) {
     println!("Enviando...");
-    cian::send_file(&archivo_local, &archivo_remoto);
+    let _ = cian::send_file(&archivo_local, &archivo_remoto);
 }
 #[tauri::command]
 fn recibir(archivo_local: &str, archivo_remoto: &str) {

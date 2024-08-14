@@ -18,7 +18,9 @@
     },
     "windows": [
       {
-        "title": "rsapp",
+        "label":"main",
+        "title": "Home | Cian",
+        "url":"download.html",
         "width": 800,
         "height": 600
       }
