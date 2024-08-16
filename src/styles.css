@@ -1,11 +1,11 @@
 * {
-  color: #fff;
   margin: 0;
   padding: 0;
   font-family: system-ui;
   text-decoration: none;
 }
 :root {
+  /* Sidebar Colors */
   --sidebar-width: 240px;
   --sidebar-back-dk: #242536;
   --sidebar-hover-dk: #1a3143ee;
@@ -17,13 +17,30 @@
   --sidebar-focus-lt: #357b8766;
   --sidebar-light: #37374a;
 
-  --form-input-focus: #214b52;
-  --form-button: #194952;
-  --form-button-hover: #045766; 
-  --button-shadow-bright: #396cd8;
+  /* Content Colors */
+  --content-back-dk: #111; 
+  --content-color-dk: #eee;
+  
+  --content-back-lt: #ccc;
+  --content-color-lt: #111;
+
+  /* Form Colors */
+  --form-input-focus-dk: #1a3143;
+  --form-button-back-dk: #194952;
+  --form-button-hover-dk: #045766;
+  --form-button-shadow-dk: #396cd8;
+  
+
+  --form-input-focus-lt: #77ace8;
+  --form-button-back-lt: #44def2;
+  --form-button-hover-lt: #24aec2; 
+  --form-button-shadow-lt: #396cd8;
 }
 h1 {
   text-align: center;
+}
+a {
+  color: inherit;
 }
 /* --- Form Styles --- */
 form {
@@ -41,18 +58,18 @@ form button {
   padding: 0.8em 1.2em;
   font-size: 1em;
   font-weight: 500;
-  background-color: var(--form-button);
+  background-color: var(--form-button-back-lt);
   transition: all 0.25s;
 }
 form input {
   width: 80%;
   margin: 10px auto;
-  border: none;
+  border: 1.8px solid var(--form-input-focus-lt);
   border-radius: 8px;
   padding: 0.8em 1.2em;
   font-size: 1em;
   font-weight: 500;
-  background-color: #333;
+  background-color: #3330;
   transition: all 0.25s;
   transition: box-shadow 0.00001ms;
 }
@@ -63,39 +80,65 @@ button {
   cursor: pointer;
 }
 form button:hover {
-  background-color: var(--form-button-hover);
+  background-color: var(--form-button-hover-lt);
 }
 form button:focus {
-  box-shadow: 0px 0px 20px 0.2px var(--button-shadow-bright);
+  box-shadow: 0px 0px 20px 0.2px var(--form-button-shadow-lt);
 }
 input,
 button {
   outline: none;
 }
-input:focus {
-  border-bottom: 2px solid var(--form-input-focus);
+form input:focus {
+  border: none;
+  border-radius: 0;
+  border-bottom: 1.8px solid var(--form-input-focus-lt);
 }
 #content {
   position: relative;
   left: var(--sidebar-width);
   height: 100%;
-  background-color: #111;
+  background-color: var(--content-back-lt);
   width: calc(100% - var(--sidebar-width));
+  transition: all 0.4s;
+}
+#content * {
+  color: #111;
 }
 /* --- SIDEBAR STYLES --- */
 #sidebar {
+  position: absolute;
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
   background-color: var(--sidebar-back-lt);
   color: white;
   height: 100vh;
-  position: fixed;
   top: 0;
   left: 0;
+  transition: all 0.4s;
 }
 #sidebar.dark {
   background-color: var(--sidebar-back-dk);
+}
+#sidebar.dark ~ #content {
+  background-color: var(--content-back-dk);
+}
+#sidebar.dark ~ #content * {
+  color: var(--content-color-dk);
+}
+#sidebar.dark + #content form input {
+  border: 1.8px solid var(--form-input-focus-dk);
+}
+#sidebar.dark + #content form input:focus {
+  border: none;
+  border-bottom: 1.8px solid var(--form-input-focus-dk)
+}
+#sidebar.dark + #content form button {
+  background-color: var(--form-button-back-dk);
+}
+#sidebar.dark + #content form button:hover {
+  background-color: var(--form-button-hover-dk);
 }
 #sidebar header {
   position: relative;
@@ -103,16 +146,30 @@ input:focus {
   display: flex;
   align-items: center;
   background-color: var(--sidebar-back-lt);
+  height: 70px;
+  transition: all 0.4s;
 }
 #sidebar.dark header {
   background-color: var(--sidebar-back-dk);
 }
 #sidebar header #toggle {
-  position: relative;
-  margin: 10px;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--sidebar-hover-lt);
+  top: 10px;
+  right: -20px;
+  border-radius: 50%;
+  padding: 5px;
   font-size: 20px;
   height: 25px;
   width: 25px;
+  z-index: 100;
+  transition: rotate 0.6s;
+}
+#sidebar.dark header #toggle {
+  background-color: var(--sidebar-hover-dk);
 }
 #sidebar ul {
   overflow: hidden;
@@ -154,7 +211,7 @@ input:focus {
 #sidebar ul .desc {
   margin-left: 15px;
   font-size: 19px;
-  transition: ease 0.4s;
+  transition: all 0.4s;
 }
 #sidebar.close ul .desc {
   opacity: 0;
@@ -180,6 +237,18 @@ input:focus {
   height: 4em;
   width: 10em;
   border-radius: 80px;
+}
+#sidebar.close #toggle_darkmode {
+  background-color: var(--sidebar-back-lt);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 4em;
+}
+#sidebar.close #toggle_darkmode::before {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 #sidebar.dark #toggle_darkmode {
   background-color: var(--sidebar-dark);

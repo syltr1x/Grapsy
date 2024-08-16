@@ -11,11 +11,25 @@ const destFile = document.querySelector('#remote_path');
 // --- Show Sidebar ---
 const menuButton = document.querySelector('#toggle');
 const menu = document.querySelector('#sidebar');
+
+let menu_status = localStorage.getItem("menu_status");
+if (menu_status && menu_status === "open") {
+  menu.classList.remove('close');
+  menuButton.style.rotate = '180deg'
+} else {
+  menu.classList.add('close');
+  menuButton.style.rotate = '0deg'
+}
+
 menuButton.addEventListener('click', () => {
   if (menu.classList.contains('close')) {
     menu.classList.remove('close');
+    menuButton.style.rotate = '180deg';
+    localStorage.setItem("menu_status", "open")
   } else {
     menu.classList.add('close')
+    menuButton.style.rotate = '0deg';
+    localStorage.setItem("menu_status", "close")
   }
 })
 
