@@ -36,6 +36,9 @@
   --form-button-hover-lt: #24aec2; 
   --form-button-shadow-lt: #396cd8;
 }
+body.charge {
+  display: none;
+}
 h1 {
   text-align: center;
 }
@@ -81,9 +84,6 @@ button {
 }
 form button:hover {
   background-color: var(--form-button-hover-lt);
-}
-form button:focus {
-  box-shadow: 0px 0px 20px 0.2px var(--form-button-shadow-lt);
 }
 input,
 button {

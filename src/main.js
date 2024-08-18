@@ -1,14 +1,6 @@
 const { appWindow, invoke } = window.__TAURI__.tauri;
 
-const texto = document.querySelector('#parrafo');
-
-// Front Functions
-const sourceFile = document.querySelector('#file_path');
-const destFile = document.querySelector('#remote_path');
-//sourceFile.addEventListener('input', () => {
-//  destFile.value = sourceFile.value;
-//})
-// --- Show Sidebar ---
+// --- Pre load Functions ---
 const menuButton = document.querySelector('#toggle');
 const menu = document.querySelector('#sidebar');
 
@@ -20,7 +12,22 @@ if (menu_status && menu_status === "open") {
   menu.classList.add('close');
   menuButton.style.rotate = '0deg'
 }
+const contenido = document.querySelector('#content');
+const darkModeButton = document.querySelector('#toggle_darkmode');
 
+let dark_mode = localStorage.getItem("dark_mode");
+if (dark_mode && dark_mode === "on") {
+  darkModeButton.classList.add('fa-moon')
+  darkModeButton.classList.add('active')
+  menu.classList.add('dark')
+} else {
+  darkModeButton.classList.add('fa-sun')
+}
+addEventListener('DOMContentLoaded', () => {
+  const body = document.querySelector('body');
+  body.classList.remove('charge')
+})
+// --- Toggle Sidebar ---
 menuButton.addEventListener('click', () => {
   if (menu.classList.contains('close')) {
     menu.classList.remove('close');
@@ -33,19 +40,7 @@ menuButton.addEventListener('click', () => {
   }
 })
 
-// --- Dark Mode ---
-const contenido = document.querySelector('#content');
-const darkModeButton = document.querySelector('#toggle_darkmode');
-
-let dark_mode = localStorage.getItem("dark_mode");
-if (dark_mode && dark_mode === "on") {
-  darkModeButton.classList.add('fa-moon')
-  darkModeButton.classList.add('active')
-  menu.classList.add('dark')
-} else {
-  darkModeButton.classList.add('fa-sun')
-}
-
+// --- Toggle Dark Mode ---
 darkModeButton.addEventListener('click', () => {
   darkModeButton.classList.toggle("active")
   if (darkModeButton.classList.contains('fa-moon')) {
