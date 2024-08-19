@@ -1,0 +1,77 @@
+<html lang="es">
+  <head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css",
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==",
+    crossorigin="anonymous">
+    <script>
+      const { appWindow, invoke } = window.__TAURI__.tauri;
+      async function fill_values() {
+        const user_field = document.querySelector('#server_user');
+        const host_field = document.querySelector('#server_address');
+        const port_field = document.querySelector('#server_port');
+        const local_field = document.querySelector('#local_path');
+        const remote_field = document.querySelector('#remote_path');
+
+        const data = JSON.parse(await invoke('read_config'))
+
+        user_field.value = data.user;
+        host_field.value = data.host;
+        port_field.value = data.port;
+        local_field.value = data.local_path;
+        remote_field.value = data.remote_path;
+      }
+      addEventListener('DOMContentLoaded', () => {
+        fill_values()
+      })
+      function write_config() {
+        const user = document.querySelector('#server_user').value;
+        const address = document.querySelector('#server_address').value;
+        const port = document.querySelector('#server_port').value;
+        const localFolder = document.querySelector('#local_path').value;
+        const remoteFolder = document.querySelector('#remote_path').value;
+
+        invoke('write_config', {user: user, host: address, port: port, localFolder: localFolder, remoteFolder: remoteFolder})
+      }
+    </script>
+  <script type="module" src="/main.js" defer></script>
+  </head>
+  <body class="charge">
+    <div id="sidebar" class="">
+      <header>
+        <i class="fa-solid fa-angle-right" id="toggle"></i>
+      </header>
+      <ul>
+        <a href="upload.html"><i class="fa-solid fa-upload"></i><p class="desc">Upload File</p></a>
+        <a href="download.html"><i class="fa-solid fa-download"></i><p class="desc">Download File</p></a>
+        <a class="active"><i class="fa-solid fa-gear"></i><p class="desc">Configure</p></a>
+        <a><i class="fa-solid fa-key"></i><p class="desc">Create key</p></a>
+        <a><i class="fa-solid fa-minimize"></i><p class="desc">Compress File</p></a>
+        <a><i class="fa-solid fa-maximize"></i><p class="desc">Decompress File</p></a>
+      </ul>
+      <footer>
+        <div id="toggle_darkmode" class="close fa-solid"></div>
+      </footer>
+    </div>
+    <div id="content">
+      <br>
+      <h1>Configure Server</h1>
+      <form>
+        <label for="server_user">Server user</label>
+        <input id="server_user" type="text" placeholder="Username">
+        <label for="server_address">Server address</label>
+        <input id="server_address" type="text" placeholder="127.0.0.1">
+        <label for="server_port">Server port</label>
+        <input id="server_port" type="text" placeholder="22">
+        <label for="local_path">Local folder</label>
+        <input id="local_path" type="text" placeholder="C:/Users/user/folder">
+        <label for="remote_path">Remote folder</label>
+        <input id="remote_path" type="text" placeholder="/home/server_user/folder">
+        <br>
+        <button type="button" onclick="write_config()">Update config</button>
+      </form>
+    </div>
+  </body>
+</html>

@@ -1,9 +1,10 @@
 use std::process::Command;
 use std::fs::{File, write};
-use std::io::{stdin, stdout, BufReader, Read, Result, Write, BufRead, ErrorKind, Error};
+use std::io::{BufReader, Read, Result, Write, BufRead, ErrorKind, Error};
 use zstd::{Encoder, Decoder};
-use std::path::Path;
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct Config {
     user: String,
     host: String,
@@ -12,85 +13,47 @@ pub struct Config {
     remote_path: String
 }
 
-pub fn read_config() -> std::io::Result<Config> {
-    if Path::new("cian.conf").exists() {
-        let file = File::open("cian.conf")?;
-        let reader = BufReader::new(file);
+pub fn read_config() -> Result<String> {
+    let file = File::open("cian.conf")?;
+    let reader = BufReader::new(file);
 
-        let mut user = String::new();
-        let mut host = String::new();
-        let mut port = String::new();
-        let mut local_path = String::new();
-        let mut remote_path = String::new();
+    let mut user = String::new();
+    let mut host = String::new();
+    let mut port = String::new();
+    let mut local_path = String::new();
+    let mut remote_path = String::new();
 
-        for line in reader.lines() {
-            let line = line?;
-            if line.starts_with("user=") {
-                user = line[5..].to_string();
-            } else if line.starts_with("host=") {
-                host = line[5..].to_string();
-            } else if line.starts_with("port=") {
-                port = line[5..].to_string();
-            } else if line.starts_with("local_path=") {
-                local_path = line[11..].to_string();
-            } else if line.starts_with("remote_path=") {
-                remote_path = line[12..].to_string();
-            }
+    for line in reader.lines() {
+        let line = line?;
+        if line.starts_with("user=") {
+            user = line[5..].to_string();
+        } else if line.starts_with("host=") {
+            host = line[5..].to_string();
+        } else if line.starts_with("port=") {
+            port = line[5..].to_string();
+        } else if line.starts_with("local_path=") {
+            local_path = line[11..].to_string();
+        } else if line.starts_with("remote_path=") {
+            remote_path = line[12..].to_string();
         }
-
-        Ok(Config {
-            user,
-            host,
-            port:port.trim().parse().unwrap(),
-            local_path,
-            remote_path
-        })
-    } else {
-        let mut file = File::create("cian.conf")?;
-        let mut user = String::new();
-        let mut host = String::new();
-        let mut port = String::new();
-        let mut local_path = String::new();
-        let mut remote_path = String::new();
-
-        print!("Server Username >> ");
-        stdout().flush()?;
-        stdin().read_line(&mut user)?;
-
-        print!("Server Address >> ");
-        stdout().flush()?;
-        stdin().read_line(&mut host)?;
-
-        print!("Server Port >> ");
-        stdout().flush()?;
-        stdin().read_line(&mut port)?;
-
-        print!("Local Path (search here for files to send) >> ");
-        stdout().flush()?;
-        stdin().read_line(&mut local_path)?;
-
-        print!("Remote path (send here all files) >> ");
-        stdout().flush()?;
-        stdin().read_line(&mut remote_path)?;
-
-        if local_path.ends_with("/") {
-            local_path.pop();
-        }
-        if remote_path.ends_with("/") {
-            remote_path.pop();
-        }
-
-        let contenido = format!("user={}\nhost={}\nport={}\nlocal_path={}\nremote_path={}", user.trim(), host.trim(), port.trim(), local_path.trim(), remote_path.trim());
-        file.write_all(contenido.as_bytes())?;
-
-        Ok(Config {
-            user,
-            host,
-            port:port.trim().parse().unwrap(),
-            local_path,
-            remote_path
-        })
     }
+
+    let config_json = serde_json::to_string(&Config {
+        user,
+        host,
+        port:port.trim().parse().unwrap(),
+        local_path,
+        remote_path
+    })?;
+
+    Ok(config_json)
+}
+pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_folder: &str) -> Result<String> {
+    let mut file = File::create("cian.conf")?;
+    file.write_all(format!("user={}\nhost={}\nport={}\nlocal_path={}\nremote_path={}",
+        user, host, port, local_folder, remote_folder).as_bytes())?;
+
+    Ok("".to_string())
 }
 pub fn compress_file(input_path: &str) -> Result<()> {
     let mut input_file = File::open(input_path)?;
@@ -125,10 +88,9 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
 }
 
 pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
-    let config = read_config()?;
-    let remote_port = config.port;
-    let remote_host = config.host;
-    let user = config.user;
+    let remote_port = "";
+    let remote_host = "";
+    let user = "";
 
     let local_path = input_path.trim();
     let input_file = File::open(local_path)?;
@@ -158,10 +120,9 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
 }
 
 pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
-    let config = read_config()?;
-    let remote_port = config.port;
-    let remote_host = config.host;
-    let user = config.user;
+    let remote_port = "";
+    let remote_host = "";
+    let user = "";
 
     println!("ssh {}@{} -p {} cat >> {}", user, remote_host, remote_port, remote_path.trim());
     let status = Command::new("ssh")
