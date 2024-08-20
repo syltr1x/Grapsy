@@ -33,12 +33,15 @@ fn read_config() -> Result<String, String> {
 #[tauri::command]
 fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_folder: &str) {
     let _ = cian::write_config(user, host, port, local_folder, remote_folder);
-    println!("EDITADO")
+}
+#[tauri::command]
+fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) {
+    let _ = cian::send_key(desc, user, password, address, port);
 }
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![comprimir, descomprimir, enviar, recibir, read_config, write_config])
+    .invoke_handler(tauri::generate_handler![comprimir, descomprimir, enviar, recibir, read_config, write_config, send_key])
     .run(tauri::generate_context!())
     .expect("failed to run app");
 }

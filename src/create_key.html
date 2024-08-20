@@ -1,0 +1,82 @@
+<html lang="es">
+  <head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css",
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==",
+    crossorigin="anonymous">
+    <script type="module" src="/main.js" defer></script>
+  </head>
+  <body class="charge">
+    <div id="sidebar" class="">
+      <header>
+        <i class="fa-solid fa-angle-right" id="toggle"></i>
+      </header>
+      <ul>
+        <a href="upload.html" ><i class="fa-solid fa-upload"></i><p class="desc">Upload File</p></a>
+        <a href="download.html"><i class="fa-solid fa-download"></i><p class="desc">Download File</p></a>
+        <a href="config.html"><i class="fa-solid fa-gear"></i><p class="desc">Configure</p></a>
+        <a class="active"><i class="fa-solid fa-key"></i><p class="desc">Create key</p></a>
+        <a><i class="fa-solid fa-minimize"></i><p class="desc">Compress File</p></a>
+        <a><i class="fa-solid fa-maximize"></i><p class="desc">Decompress File</p></a>
+      </ul>
+      <footer>
+        <div id="toggle_darkmode" class="close fa-solid"></div>
+      </footer>
+    </div>
+    <div id="content">
+      <br>
+      <h1>Create Key</h1>
+      <form>
+        <label for="description">Key name/description</label>
+        <input id="description" type="text" placeholder="Personal Computer Access (Home)">
+        <label for="username">Server user</label>
+        <input id="username" type="text" placeholder="username">
+        <label for="password">Server password</label>
+        <div id="password_field">
+          <input id="password" type="password" placeholder="password123">
+          <i id="show_icon" class="fa-solid fa-eye"></i>
+        </div>
+        <label for="address">Server address</label>
+        <input id="address" type="text" placeholder="127.0.0.1">
+        <label for="port">Server port</label>
+        <input id="port" type="text" placeholder="22">
+        <br>
+        <br>
+        <br>
+        <button type="button" onclick="send_file()">Autenticar clave</button>
+      </form>
+    </div>
+    <script>
+      // Toggle password visibility
+      const show_button = document.querySelector('#show_icon');
+      const password_field = document.querySelector('#password');
+      
+      show_button.addEventListener('click', () => {
+        if (show_button.classList.contains('fa-eye')) {
+          show_button.classList.remove('fa-eye')
+          show_button.classList.add('fa-eye-slash')
+          password_field.setAttribute('type', 'text')
+        } else {
+          show_button.classList.remove('fa-eye-slash')
+          show_button.classList.add('fa-eye')
+          password_field.setAttribute('type', 'password')
+        }
+      })
+
+      // Connect rust back to send key
+      const { appWindow, invoke } = window.__TAURI__.tauri;
+
+      function send_file() {
+        const description = document.querySelector('#description').value;
+        const username = document.querySelector('#username').value;
+        const password = password_field.value;
+        const address = document.querySelector('#address').value;
+        const port = document.querySelector('#port').value;
+
+        invoke('send_key', { desc: description, user: username, password: password, address: address, port: port})
+      }
+    </script>
+  </body>
+</html>

@@ -94,6 +94,20 @@ form input:focus {
   border-radius: 0;
   border-bottom: 1.8px solid var(--form-input-focus-lt);
 }
+form #password_field {
+  display: inline-flex;
+  position: relative;
+}
+form #show_icon {
+  position: absolute;
+  top: 50%;
+  right: 13%;
+  transform: translate(0, -45%);
+  max-width: 2.6rem;
+  max-height: 2.6rem;
+  background-color: #111;
+  font-size: 1.3em;
+}
 #content {
   position: relative;
   left: var(--sidebar-width);

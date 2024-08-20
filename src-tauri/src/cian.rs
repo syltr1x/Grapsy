@@ -1,8 +1,9 @@
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::fs::{File, write};
-use std::io::{BufReader, Read, Result, Write, BufRead, ErrorKind, Error};
+use std::io::{BufReader, Read, Result, Write, BufRead, ErrorKind, Error, BufWriter};
 use zstd::{Encoder, Decoder};
 use serde::{Serialize, Deserialize};
+use dirs;
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
@@ -137,5 +138,33 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
         eprintln!("Error: {}", String::from_utf8_lossy(&status.stderr));
         return Err(Error::new(ErrorKind::Other, "Failed to execute command"));
     }
+    Ok(())
+}
+
+pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()>{
+    let home_dir = dirs::home_dir().expect("Error msg");
+    let _create_key = Command::new("ssh-keygen")
+        .arg(format!("-trsa"))
+        .arg(format!("-b4096"))
+        .arg(format!("-C'{}'", desc))
+        .arg(format!("-f{}/.ssh/{}-server", home_dir.display(), user))
+        .status()?; 
+
+    println!("CREADO CORRECTAMENTE");
+    let mut send_key = Command::new("ssh-copy-id")
+        .arg(format!("-i{}/.ssh/{}-server.pub", home_dir.display(), user.trim()))
+        .arg(format!("{}@{}", user.trim(), address.trim()))
+        //.arg(format!("-p{}", port.trim()))
+        .stdin(Stdio::piped())
+        .spawn()?;
+
+    if let Some(ref mut stdin) = send_key.stdin {
+        let mut stdin = BufWriter::new(stdin);
+        
+        // Write the password to stdin
+        writeln!(stdin, "{}", password.trim())?;
+        stdin.flush()?;
+    }
+
     Ok(())
 }
