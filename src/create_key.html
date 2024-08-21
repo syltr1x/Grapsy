@@ -7,6 +7,22 @@
     integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==",
     crossorigin="anonymous">
     <script type="module" src="/main.js" defer></script>
+    <script>
+      async function fill_values() {
+        const user_field = document.querySelector('#username');
+        const host_field = document.querySelector('#address');
+        const port_field = document.querySelector('#port');
+
+        const data = JSON.parse(await invoke('read_config'))
+
+        user_field.value = data.user;
+        host_field.value = data.host;
+        port_field.value = data.port;
+      }
+      addEventListener('DOMContentLoaded', () => {
+        fill_values()
+      })
+    </script>
   </head>
   <body class="charge">
     <div id="sidebar" class="">
