@@ -1,9 +1,15 @@
-use std::process::{Command, Stdio};
+use std::thread;
+use std::path::Path;
+use std::net::TcpStream;
+use std::time::Duration;
 use std::fs::{File, write};
-use std::io::{BufReader, Read, Result, Write, BufRead, ErrorKind, Error, BufWriter};
+use std::process::{Command, Stdio};
+use std::io::{BufReader, Read, Result, Write, BufRead, ErrorKind, Error};
+
+use dirs;
+use ssh2::Session;
 use zstd::{Encoder, Decoder};
 use serde::{Serialize, Deserialize};
-use dirs;
 
 #[derive(Serialize, Deserialize)]
 pub struct Config {
@@ -141,30 +147,45 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()>{
+pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()> {
     let home_dir = dirs::home_dir().expect("Error msg");
+    // Create key
     let _create_key = Command::new("ssh-keygen")
         .arg(format!("-trsa"))
         .arg(format!("-b4096"))
         .arg(format!("-C'{}'", desc))
-        .arg(format!("-f{}/.ssh/{}-server", home_dir.display(), user))
-        .status()?; 
+        .arg(format!("-f{}/.ssh/{}-server", home_dir.display(), user.trim()))
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()?; 
 
-    println!("CREADO CORRECTAMENTE");
-    let mut send_key = Command::new("ssh-copy-id")
-        .arg(format!("-i{}/.ssh/{}-server.pub", home_dir.display(), user.trim()))
-        .arg(format!("{}@{}", user.trim(), address.trim()))
-        //.arg(format!("-p{}", port.trim()))
-        .stdin(Stdio::piped())
-        .spawn()?;
+    // Send Key to Remote server
+    let tcp = TcpStream::connect(format!("{}:{}", address.trim(), port.trim()))?;
+    let mut sess = Session::new()?;
+    sess.set_tcp_stream(tcp);
+    sess.handshake()?;
 
-    if let Some(ref mut stdin) = send_key.stdin {
-        let mut stdin = BufWriter::new(stdin);
-        
-        // Write the password to stdin
-        writeln!(stdin, "{}", password.trim())?;
-        stdin.flush()?;
+    sess.userauth_password(user.trim(), password.trim())?;
+
+    //if !sess.authenticated() {
+    //    println!("Err: Authentication failed :(");
+    //}
+
+    while !Path::new(&format!("{}/.ssh/{}-server.pub", home_dir.display(), user.trim())).exists() {
+        thread::sleep(Duration::from_millis(500));
     }
+
+    let mut local_file = File::open(format!("{}/.ssh/{}-server.pub", home_dir.display(), user.trim()))?;
+    let mut file_content = Vec::new();
+    local_file.read_to_end(&mut file_content)?;
+
+    let mut channel = sess.channel_session()?;
+    let command = format!("cat > /home/{}/.ssh/authorized_keys", user.trim()); 
+    channel.exec(&command)?;
+    channel.write_all(&file_content)?;
+
+    channel.send_eof()?;
+    channel.wait_close()?;
 
     Ok(())
 }
