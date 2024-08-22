@@ -1,5 +1,5 @@
 [package]
-name = "rsapp"
+name = "cian"
 version = "0.0.0"
 description = "A Tauri App"
 authors = ["you"]

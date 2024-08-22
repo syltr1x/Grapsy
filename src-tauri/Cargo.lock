@@ -307,6 +307,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "cian"
+version = "0.0.0"
+dependencies = [
+ "dirs",
+ "serde",
+ "serde_json",
+ "ssh2",
+ "tauri",
+ "tauri-build",
+ "zstd",
+]
+
+[[package]]
 name = "cocoa"
 version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2248,19 +2261,6 @@ name = "regex-syntax"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
-
-[[package]]
-name = "rsapp"
-version = "0.0.0"
-dependencies = [
- "dirs",
- "serde",
- "serde_json",
- "ssh2",
- "tauri",
- "tauri-build",
- "zstd",
-]
 
 [[package]]
 name = "rustc-demangle"
