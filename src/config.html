@@ -60,10 +60,16 @@
       <form>
         <label for="server_user">Server user</label>
         <input id="server_user" type="text" placeholder="Username">
-        <label for="server_address">Server address</label>
-        <input id="server_address" type="text" placeholder="127.0.0.1">
-        <label for="server_port">Server port</label>
-        <input id="server_port" type="text" placeholder="22">
+        <div class="dst_address">
+          <div>
+            <label for="server_address">Server address</label>
+            <input id="server_address" type="text" placeholder="127.0.0.1">
+          </div>
+          <div>
+            <label for="server_port">Server port</label>
+            <input id="server_port" type="text" placeholder="22">
+          </div>
+        </div>
         <label for="local_path">Local folder</label>
         <input id="local_path" type="text" placeholder="C:/Users/user/folder">
         <label for="remote_path">Remote folder</label>

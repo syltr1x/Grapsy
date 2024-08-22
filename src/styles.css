@@ -47,10 +47,17 @@
 body.charge {
   display: none;
 }
+body {
+  display: flex;
+  overflow-y: hidden;
+  min-height: 100vh;
+  flex-direction: column;
+  box-sizing: border-box;
+}
 h1 {
   text-align: center;
 }
-a {
+a { 
   color: inherit;
 }
 #storage_bar {
@@ -78,15 +85,16 @@ a {
 }
 /* --- Form Styles --- */
 form {
+  border: 1px solid red;
   display: flex;
   flex-direction: column;
-  margin: 5rem 20%;
+  margin: 3rem 20%;
+  max-height: 80vh;
   width: 60%;
-  border-radius: 1.4rem;
 }
 form button {
   width: 80%;
-  margin: 5rem auto 2.3rem auto;
+  margin: 3rem auto 5px auto;
   border: none;
   border-radius: 8px;
   padding: 0.8em 1.2em;
@@ -106,6 +114,22 @@ form input {
   background-color: #3330;
   transition: all 0.25s;
   transition: box-shadow 0.00001ms;
+}
+.dst_address {
+  display: flex;
+  align-items: center;
+  max-width: 90%;
+  margin: 0 10%;
+}
+.dst_address > div {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.dst_address > div > *{
+  width: 90%;
 }
 form label {
   margin: 1rem auto 0px auto;
@@ -176,7 +200,7 @@ form #show_icon {
   width: var(--sidebar-width);
   background-color: var(--sidebar-back-lt);
   color: white;
-  height: 100vh;
+  height: 100%;
   top: 0;
   left: 0;
   transition: all 0.4s;
@@ -277,6 +301,7 @@ form #show_icon {
   justify-content: center;
 }
 #toggle_darkmode {
+  cursor: pointer;
   background-color: var(--sidebar-light);
   height: 4em;
   width: 10em;
