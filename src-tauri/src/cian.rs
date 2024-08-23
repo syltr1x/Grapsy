@@ -12,7 +12,7 @@ use zstd::{Encoder, Decoder};
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct Config {
+pub struct ConfigJson {
     user: String,
     host: String,
     port: u16,
@@ -20,7 +20,50 @@ pub struct Config {
     remote_path: String
 }
 
-pub fn read_config() -> Result<String> {
+pub struct Config {
+    user: String,
+    host: String,
+    port: u16,
+    //local_path: String,
+    //remote_path: String
+}
+
+fn read_config() -> Result<Config> {
+    let file = File::open("cian.conf")?;
+    let reader = BufReader::new(file);
+
+    let mut user = String::new();
+    let mut host = String::new();
+    let mut port = String::new();
+    //let mut local_path = String::new();
+    //let mut remote_path = String::new();
+
+    for line in reader.lines() {
+        let line = line?;
+        if line.starts_with("user=") {
+            user = line[5..].to_string();
+        } else if line.starts_with("host=") {
+            host = line[5..].to_string();
+        } else if line.starts_with("port=") {
+            port = line[5..].to_string();
+        }// else if line.starts_with("local_path=") {
+        //    local_path = line[11..].to_string();
+        //} else if line.starts_with("remote_path=") {
+        //    remote_path = line[12..].to_string();
+        //}
+    }
+
+    let config = Config {
+        user,
+        host,
+        port:port.trim().parse().unwrap(),
+        //local_path,
+        //remote_path
+};
+
+    Ok(config)
+}
+pub fn read_config_json() -> Result<String> {
     let file = File::open("cian.conf")?;
     let reader = BufReader::new(file);
 
@@ -45,7 +88,7 @@ pub fn read_config() -> Result<String> {
         }
     }
 
-    let config_json = serde_json::to_string(&Config {
+    let config_json = serde_json::to_string(&ConfigJson {
         user,
         host,
         port:port.trim().parse().unwrap(),
@@ -95,9 +138,10 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
 }
 
 pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
-    let remote_port = "";
-    let remote_host = "";
-    let user = "";
+    let config = read_config()?;
+    let remote_port = config.port;
+    let remote_host = config.host;
+    let user = config.user;
 
     let local_path = input_path.trim();
     let input_file = File::open(local_path)?;
@@ -127,9 +171,10 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
 }
 
 pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
-    let remote_port = "";
-    let remote_host = "";
-    let user = "";
+    let config = read_config()?;
+    let remote_port = config.port;
+    let remote_host = config.host;
+    let user = config.user;
 
     println!("ssh {}@{} -p {} cat >> {}", user, remote_host, remote_port, remote_path.trim());
     let status = Command::new("ssh")

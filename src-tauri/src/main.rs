@@ -25,7 +25,7 @@ fn recibir(archivo_local: &str, archivo_remoto: &str) {
 }
 #[tauri::command]
 fn read_config() -> Result<String, String> {
-    match cian::read_config() {
+    match cian::read_config_json() {
         Ok(config) => Ok(config),
         Err(e) => Err(format!("Error reading config: {}", e)),
     }
