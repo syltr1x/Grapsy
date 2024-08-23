@@ -39,10 +39,10 @@
 
   /* Storage Colors */
   --storage-width: 0px; /* 0px to 400px */
-  --storage-back-lt: #0000;
-  --storage-content-lt:#0000;
-  --storage-back-dk: #0000;
-  --storage-content-dk: #0000;
+  --storage-back-lt: #384dc3;
+  --storage-content-lt:#88ddff;
+  --storage-back-dk: #114255;
+  --storage-content-dk: #2693e9;
 }
 body.charge {
   display: none;
@@ -57,7 +57,7 @@ a {
   position: relative;
   width: 400px;
   height: 25px;
-  background: var(--form-input-focus-dk);
+  background-color: var(--storage-back-lt);
   overflow: hidden;
   border-radius: 2rem;
   margin: 8px 0px;
@@ -65,10 +65,16 @@ a {
 #storage_bar::before {
   content: '';
   position: absolute;
-  background: var(--form-button-shadow-dk);
+  background-color: var(--storage-content-lt);
   height: 25px;
   border-radius: 2rem;
   width: var(--storage-width);
+}
+#sidebar.dark + #content form #storage_bar {
+  background-color: var(--storage-back-dk);
+}
+#sidebar.dark + #content form #storage_bar::before {
+  background-color: var(--storage-content-dk);
 }
 /* --- Form Styles --- */
 form {
@@ -132,6 +138,19 @@ form #show_icon {
   max-height: 2.6rem;
   font-size: 1.3em;
 }
+#sidebar.dark + #content form input {
+  border: 1.8px solid var(--form-input-focus-dk);
+}
+#sidebar.dark + #content form input:focus {
+  border: none;
+  border-bottom: 1.8px solid var(--form-input-focus-dk)
+}
+#sidebar.dark + #content form button {
+  background-color: var(--form-button-back-dk);
+}
+#sidebar.dark + #content form button:hover {
+  background-color: var(--form-button-hover-dk);
+}
 #content {
   position: relative;
   left: var(--sidebar-width);
@@ -142,6 +161,12 @@ form #show_icon {
 }
 #content * {
   color: #111;
+}
+#sidebar.dark ~ #content {
+  background-color: var(--content-back-dk);
+}
+#sidebar.dark ~ #content * {
+  color: var(--content-color-dk);
 }
 /* --- SIDEBAR STYLES --- */
 #sidebar {
@@ -158,25 +183,6 @@ form #show_icon {
 }
 #sidebar.dark {
   background-color: var(--sidebar-back-dk);
-}
-#sidebar.dark ~ #content {
-  background-color: var(--content-back-dk);
-}
-#sidebar.dark ~ #content * {
-  color: var(--content-color-dk);
-}
-#sidebar.dark + #content form input {
-  border: 1.8px solid var(--form-input-focus-dk);
-}
-#sidebar.dark + #content form input:focus {
-  border: none;
-  border-bottom: 1.8px solid var(--form-input-focus-dk)
-}
-#sidebar.dark + #content form button {
-  background-color: var(--form-button-back-dk);
-}
-#sidebar.dark + #content form button:hover {
-  background-color: var(--form-button-hover-dk);
 }
 #sidebar header {
   position: relative;
@@ -231,11 +237,11 @@ form #show_icon {
 #sidebar ul a:hover {
   background-color: var(--sidebar-hover-lt);
 }
-#sidebar.dark ul a:hover {
-  background-color: var(--sidebar-hover-dk);
-}
 #sidebar ul a.active {
   background-color: var(--sidebar-focus-lt);
+}
+#sidebar.dark ul a:hover {
+  background-color: var(--sidebar-hover-dk);
 }
 #sidebar.dark ul a.active {
   background-color: var(--sidebar-focus-dk);
