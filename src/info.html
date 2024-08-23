@@ -14,11 +14,11 @@
         <i class="fa-solid fa-angle-right" id="toggle"></i>
       </header>
       <ul>
-        <a href="upload.html"><i class="fa-solid fa-upload"></i><p class="desc">Upload File</p></a>
-        <a class="active"><i class="fa-solid fa-download"></i><p class="desc">Download File</p></a>
+        <a href="upload.html" ><i class="fa-solid fa-upload"></i><p class="desc">Upload File</p></a>
+        <a href="download.html"><i class="fa-solid fa-download"></i><p class="desc">Download File</p></a>
         <a href="config.html"><i class="fa-solid fa-gear"></i><p class="desc">Configure</p></a>
         <a href="create_key.html"><i class="fa-solid fa-key"></i><p class="desc">Create Key</p></a>
-        <a href="info.html"><i class="fa-solid fa-circle-info"></i><p class="desc">Server Info</p></a>
+        <a class="active"><i class="fa-solid fa-circle-info"></i><p class="desc">Server Info</p></a>
       </ul>
       <footer>
         <div id="toggle_darkmode" class="close fa-solid"></div>
@@ -26,15 +26,21 @@
     </div>
     <div id="content">
       <br>
-      <h1>Download File</h1>
+      <h1>Server Info</h1>
       <form>
-        <label for="remote_path">Ruta del archivo (remoto)</label>
-        <input id="remote_path" type="text" placeholder="/folder/resources/filename.txt.zst">
-        <label for="file_path">Ruta del archivo (local)</label>
-        <input id="file_path" type="text" placeholder="/home/cian/dst">
+				<h2>Server Status: On</h2>
+        <h2>Server Storage:</h2>
+        <div id="storage_bar"></div>
+        <h2>Server key Status: no-key</h2>
+        <p><i class="fa-solid fa-triangle-exclamation"></i> Please create key and authenticate to server to use the program.</p>
         <br>
-        <button onclick="receive_file()">Recibir archivo</button>
       </form>
     </div>
+    <script>
+      function storage_bar(storage) {
+        const storageBar = document.querySelector('#storage_bar');
+        storageBar.style.setProperty('--storage-width', `${storage}px`);
+      }
+    </script>
   </body>
 </html>
