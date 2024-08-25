@@ -145,7 +145,7 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
 
     let content = fs::read(input_path.trim())?;
 
-    // Connect to the local SSH server
+    // Stablish ssh connection
     let tcp = TcpStream::connect(format!("{}:{}", remote_host, remote_port)).unwrap();
     let mut sess = Session::new().unwrap();
     sess.set_tcp_stream(tcp);
@@ -153,8 +153,9 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
     sess.userauth_agent(user.trim()).unwrap();
 
     // Write the file
-    let mut remote_file = sess.scp_send(Path::new(remote_path.trim()),0o644, 10, None).unwrap();
+    let mut remote_file = sess.scp_send(Path::new(&format!("{}/",remote_path.trim())),0o644, 10, None).unwrap();
     remote_file.write(&content)?;
+
     // Close the channel and wait for the whole content to be transferred
     remote_file.send_eof().unwrap();
     remote_file.wait_eof().unwrap();
@@ -170,19 +171,29 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
     let remote_host = config.host;
     let user = config.user;
 
-    println!("ssh {}@{} -p {} cat >> {}", user, remote_host, remote_port, remote_path.trim());
-    let status = Command::new("ssh")
-        .arg(format!("{}@{}", user, remote_host))
-        .arg(format!("-p {}", remote_port))
-        .arg(format!("cat {}", remote_path.trim()))
-        .output()?;
+    // Stablish ssh connection
+    let tcp = TcpStream::connect(format!("{}:{}", remote_host, remote_port)).unwrap();
+    let mut sess = Session::new().unwrap();
+    sess.set_tcp_stream(tcp);
+    sess.handshake().unwrap();
+    sess.userauth_agent(&user).unwrap();
 
-    if status.status.success() {
-        write(local_path.trim(), status.stdout)?;
-    } else {
-        eprintln!("Error: {}", String::from_utf8_lossy(&status.stderr));
-        return Err(Error::new(ErrorKind::Other, "Failed to execute command"));
-    }
+    // Read remote file
+    let (mut remote_file, stat) = sess.scp_recv(Path::new(remote_path)).unwrap();
+    println!("remote file size: {}", stat.size());
+    let mut contents = Vec::new();
+    remote_file.read_to_end(&mut contents).unwrap();
+
+    // Save local file
+    let mut local_file = File::create(local_path).unwrap();
+    local_file.write_all(&contents).unwrap();
+
+    // Close the channel and wait for the whole content to be tranferred
+    remote_file.send_eof().unwrap();
+    remote_file.wait_eof().unwrap();
+    remote_file.close().unwrap();
+    remote_file.wait_close().unwrap();
+
     Ok(())
 }
 
