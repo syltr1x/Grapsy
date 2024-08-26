@@ -56,38 +56,22 @@ darkModeButton.addEventListener('click', () => {
   }
 })
 
+// --- Toggle Password Visibility ---
+const show_button = document.querySelector('#show_icon');
+const password_field = document.querySelector('#password');
+
+show_button.addEventListener('click', () => {
+  if (show_button.classList.contains('fa-eye')) {
+    show_button.classList.remove('fa-eye')
+    show_button.classList.add('fa-eye-slash')
+    password_field.setAttribute('type', 'text')
+  } else {
+    show_button.classList.remove('fa-eye-slash')
+    show_button.classList.add('fa-eye')
+    password_field.setAttribute('type', 'password')
+  }
+})
 // Cian Back Functions
-function compress_file() {
-  const filePath = document.querySelector('#file_path');
-  if (filePath.value.length < 1) {
-    texto.innerHTML = `La ruta del archivo no puede estar vacia.`;
-    return 1
-  }
-  texto.innerHTML = `comprimiendo: ${filePath.value}...`;
-  invoke('comprimir', { directorio: filePath.value })
-  texto.innerHTML = `${filePath.value} Se comprimio correctamente.`;
-}
-function decompress_file() {
-  const filePath = document.querySelector('#file_path');
-  if (filePath.value.length < 1) {
-    texto.innerHTML = `La ruta del archivo no puede estar vacia.`;
-    return 1
-  }
-  texto.innerHTML = `descomprimiendo: ${filePath.value}...`;
-  invoke('descomprimir', { directorio: filePath.value })
-  texto.innerHTML = `${filePath.value} Se descomprimio correctamente.`;
-}
-function send_file() {
-  const filePath = document.querySelector('#file_path');
-  const remotePath = document.querySelector('#remote_path');
-  if (filePath.value.length < 1) {
-    texto.innerHTML = `La ruta del archivo no puede estar vacia.`;
-    return 1
-  }
-  texto.innerHTML = `enviando: ${filePath.value}...`;
-  invoke('enviar', { archivoLocal: filePath.value , archivoRemoto: remotePath.value})
-  texto.innerHTML = `${filePath.value} Se envio correctamente.`;
-}
 function receive_file() {
   const filePath = document.querySelector('#file_path');
   const remotePath = document.querySelector('#remote_path');

@@ -12,7 +12,6 @@
         const user_field = document.querySelector('#username');
         const host_field = document.querySelector('#address');
         const port_field = document.querySelector('#port');
-
         const data = JSON.parse(await invoke('read_config'))
 
         user_field.value = data.user;
@@ -66,30 +65,14 @@
         <br>
         <br>
         <br>
-        <button type="button" onclick="send_file()">Autenticar clave</button>
+        <button type="button" onclick="send_key()">Autenticar clave</button>
       </form>
     </div>
     <script>
-      // Toggle password visibility
-      const show_button = document.querySelector('#show_icon');
-      const password_field = document.querySelector('#password');
-      
-      show_button.addEventListener('click', () => {
-        if (show_button.classList.contains('fa-eye')) {
-          show_button.classList.remove('fa-eye')
-          show_button.classList.add('fa-eye-slash')
-          password_field.setAttribute('type', 'text')
-        } else {
-          show_button.classList.remove('fa-eye-slash')
-          show_button.classList.add('fa-eye')
-          password_field.setAttribute('type', 'password')
-        }
-      })
-
       // Connect rust back to send key
-      const { appWindow, invoke } = window.__TAURI__.tauri;
+      const { invoke } = window.__TAURI__.tauri;
 
-      function send_file() {
+      function send_key() {
         const description = document.querySelector('#description').value;
         const username = document.querySelector('#username').value;
         const password = password_field.value;

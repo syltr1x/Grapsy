@@ -1,4 +1,4 @@
-use std::thread;
+use std::{fs, thread};
 use std::path::Path;
 use std::net::TcpStream;
 use std::time::Duration;
@@ -143,30 +143,24 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
     let remote_host = config.host;
     let user = config.user;
 
-    let local_path = input_path.trim();
-    let input_file = File::open(local_path)?;
-    let mut reader = BufReader::new(input_file);
+    let content = fs::read(input_path.trim())?;
 
-    println!("ssh -p {} {}@{} cat >> {}", remote_port, user ,remote_host, remote_path.trim());
-    let mut comm = Command::new("ssh")
-        .arg(format!("-p {}", remote_port))
-        .arg(format!("{}@{}", user, remote_host))
-        .arg(format!("cat >> {}", remote_path.trim()))
-        .stdin(std::process::Stdio::piped())
-        .spawn()?;
+    // Connect to the local SSH server
+    let tcp = TcpStream::connect(format!("{}:{}", remote_host, remote_port)).unwrap();
+    let mut sess = Session::new().unwrap();
+    sess.set_tcp_stream(tcp);
+    sess.handshake().unwrap();
+    sess.userauth_agent(user.trim()).unwrap();
 
-    let stdin = comm.stdin.as_mut().ok_or_else(|| Error::new(ErrorKind::Other, "Failed to open stdin"))?;
+    // Write the file
+    let mut remote_file = sess.scp_send(Path::new(remote_path.trim()),0o644, 10, None).unwrap();
+    remote_file.write(&content)?;
+    // Close the channel and wait for the whole content to be transferred
+    remote_file.send_eof().unwrap();
+    remote_file.wait_eof().unwrap();
+    remote_file.close().unwrap();
+    remote_file.wait_close().unwrap();
 
-    let mut buffer = [0; 4096];
-    loop {
-        let bytes_read = reader.read(&mut buffer)?;
-        if bytes_read == 0 {
-            break;
-        }
-        print!("{:02x} ", bytes_read);
-        stdin.write_all(&buffer[..bytes_read])?;
-    }
-    comm.wait()?;
     Ok(())
 }
 
@@ -195,14 +189,14 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
 pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()> {
     let home_dir = dirs::home_dir().expect("Error msg");
     // Create key
-    let _create_key = Command::new("ssh-keygen")
+     let _create_key = Command::new("ssh-keygen")
         .arg(format!("-trsa"))
         .arg(format!("-b4096"))
         .arg(format!("-C'{}'", desc))
-        .arg(format!("-f{}/.ssh/{}-server", home_dir.display(), user.trim()))
+        .arg(format!("-f{}/.ssh/id_rsa", home_dir.display()))
         .stdout(Stdio::null())
         .stderr(Stdio::null())
-        .spawn()?; 
+        .spawn()?;
 
     // Send Key to Remote server
     let tcp = TcpStream::connect(format!("{}:{}", address.trim(), port.trim()))?;
@@ -216,11 +210,11 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     //    println!("Err: Authentication failed :(");
     //}
 
-    while !Path::new(&format!("{}/.ssh/{}-server.pub", home_dir.display(), user.trim())).exists() {
+    while !Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
         thread::sleep(Duration::from_millis(500));
     }
 
-    let mut local_file = File::open(format!("{}/.ssh/{}-server.pub", home_dir.display(), user.trim()))?;
+    let mut local_file = File::open(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?;
     let mut file_content = Vec::new();
     local_file.read_to_end(&mut file_content)?;
 
