@@ -22,7 +22,7 @@
   --content-back-dk: #111; 
   --content-color-dk: #eee;
   
-  --content-back-lt: #ccc;
+  --content-back-lt: #fefefe;
   --content-color-lt: #111;
 
   /* Form Colors */
@@ -85,16 +85,16 @@ a {
 }
 /* --- Form Styles --- */
 form {
-  border: 1px solid red;
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
   margin: 3rem 20%;
   max-height: 80vh;
   width: 60%;
 }
 form button {
   width: 80%;
-  margin: 3rem auto 5px auto;
+  margin: 3rem auto 2rem auto;
   border: none;
   border-radius: 8px;
   padding: 0.8em 1.2em;
@@ -178,7 +178,7 @@ form #show_icon {
 #content {
   position: relative;
   left: var(--sidebar-width);
-  height: 100%;
+  height: 100vh;
   background-color: var(--content-back-lt);
   width: calc(100% - var(--sidebar-width));
   transition: all 0.4s;
@@ -308,7 +308,6 @@ form #show_icon {
   border-radius: 80px;
 }
 #sidebar.close #toggle_darkmode {
-  background-color: var(--sidebar-back-lt);
   display: flex;
   justify-content: center;
   align-items: center;
