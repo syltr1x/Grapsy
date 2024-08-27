@@ -28,12 +28,12 @@
       <br>
       <h1>Download File</h1>
       <form>
-        <label for="remote_path">Ruta del archivo (remoto)</label>
+        <label for="remote_path">Remote filename</label>
         <input id="remote_path" type="text" placeholder="/folder/resources/filename.txt.zst">
-        <label for="file_path">Ruta del archivo (local)</label>
+        <label for="file_path">Local file destination (without "/" at the end)</label>
         <input id="file_path" type="text" placeholder="/home/cian/dst">
         <br>
-        <button onclick="receive_file()">Recibir archivo</button>
+        <button id="receive_file"><i class="fa-solid fa-arrow-down"></i>Download file</button>
       </form>
     </div>
   </body>

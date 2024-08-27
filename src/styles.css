@@ -103,6 +103,9 @@ form button {
   background-color: var(--form-button-back-lt);
   transition: all 0.25s;
 }
+form button i {
+  margin-right: 20px;
+}
 form input {
   width: 80%;
   margin: 10px auto;

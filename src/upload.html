@@ -28,12 +28,12 @@
       <br>
       <h1>Upload file</h1>
       <form>
-        <label for="file_path">Ruta del archivo (local)</label>
-        <input id="file_path" type="text" placeholder="/home/cian/file.txt">
-        <label for="remote_path">Ruta del archivo (remoto)</label>
+        <button id="file_button" type="button"><i class="fa-solid fa-file"></i> Select files</button>
+        <div id="preview"></div>
+        <label for="remote_path">Destination folder (without "/" at the end)</label>
         <input id="remote_path" type="text" placeholder="/folder/dir_1/dst_dir">
         <br>
-        <button onclick="send_file()">Enviar archivo</button>
+        <button type="button" id="send_files" disabled=true><i class="fa-solid fa-arrow-up"></i>Upload Files</button>
       </form>
     </div>
   </body>

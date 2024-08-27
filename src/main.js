@@ -1,4 +1,5 @@
 const { appWindow, invoke } = window.__TAURI__.tauri;
+const { open } = window.__TAURI__.dialog;
 
 // --- Pre load Functions ---
 const menuButton = document.querySelector('#toggle');
@@ -58,20 +59,77 @@ darkModeButton.addEventListener('click', () => {
 
 // --- Toggle Password Visibility ---
 const show_button = document.querySelector('#show_icon');
-const password_field = document.querySelector('#password');
+if (show_button !== null) {
+  const password_field = document.querySelector('#password');
 
-show_button.addEventListener('click', () => {
-  if (show_button.classList.contains('fa-eye')) {
-    show_button.classList.remove('fa-eye')
-    show_button.classList.add('fa-eye-slash')
-    password_field.setAttribute('type', 'text')
-  } else {
-    show_button.classList.remove('fa-eye-slash')
-    show_button.classList.add('fa-eye')
-    password_field.setAttribute('type', 'password')
+  show_button.addEventListener('click', () => {
+    if (show_button.classList.contains('fa-eye')) {
+      show_button.classList.remove('fa-eye')
+      show_button.classList.add('fa-eye-slash')
+      password_field.setAttribute('type', 'text')
+    } else {
+      show_button.classList.remove('fa-eye-slash')
+      show_button.classList.add('fa-eye')
+      password_field.setAttribute('type', 'password')
+    }
+  })
+}
+
+// --- Select Files ---
+const filesButton = document.querySelector('#file_button');
+const sendButton = document.querySelector('#send_files');
+let filesList = null;
+
+// Open file explorer to select file/s
+if (filesButton !== null) {
+  filesButton.addEventListener('click', async () => {
+    const selectedFilePath = await open({
+      multiple: true
+    });
+
+    if (selectedFilePath) {
+      processFile(selectedFilePath);
+      filesList = selectedFilePath;
+      sendButton.disabled = false;
+    }
+  });
+}
+
+// Process every file (write and store path)
+function processFile(files) {
+  document.querySelector('#preview').innerHTML = "";
+  Object.keys(files).forEach(key => {
+    console.log(`File path: ${files[key]}`);
+    const fileData = `<div class="file-container">
+      <div class="status">
+        <span class="status-text"><b>${key}: </b> ${files[key]}...</span>
+      </div>
+    </div>`;
+    const html = document.querySelector('#preview');
+    html.innerHTML = fileData + html.innerHTML;
+  });
+}
+
+// Button logic if no files selected
+sendButton.addEventListener('mouseenter', (e) => {
+  e.preventDefault()
+  if (sendButton.disabled) {
+    sendButton.innerHTML = '<i class="fa-solid fa-ban"></i> Please select files first';
   }
 })
-// Cian Back Functions
+sendButton.addEventListener('mouseleave', (e) => {
+  e.preventDefault()
+  sendButton.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Upload Files';
+})
+// Send files (if they're selected)
+sendButton.addEventListener('click', () => {
+  const remotePath = document.querySelector('#remote_path');
+  if (filesList === null) {alert('Error: No files to upload \n Please select files first')}
+  Object.keys(filesList.forEach(key => {
+    invoke('enviar', { archivoLocal: filesList[key] , archivoRemoto: remotePath.value})
+  }))
+})
+
 function receive_file() {
   const filePath = document.querySelector('#file_path');
   const remotePath = document.querySelector('#remote_path');
