@@ -1,10 +1,10 @@
 use std::{fs, thread};
 use std::path::Path;
-use std::net::TcpStream;
+use std::net::{Ipv4Addr, TcpStream};
 use std::time::Duration;
-use std::fs::{File, write};
+use std::fs::File;
 use std::process::{Command, Stdio};
-use std::io::{BufReader, Read, Result, Write, BufRead, ErrorKind, Error};
+use std::io::{BufReader, Read, Result, Write, BufRead};
 
 use dirs;
 use ssh2::Session;
@@ -19,6 +19,14 @@ pub struct ConfigJson {
     local_path: String,
     remote_path: String
 }
+#[derive(Serialize, Deserialize)]
+pub struct Server {
+    status: bool,
+    address: Ipv4Addr,
+    port: u16,
+    authenticated: bool,
+    storage: Storage
+}
 
 pub struct Config {
     user: String,
@@ -26,6 +34,11 @@ pub struct Config {
     port: u16,
     //local_path: String,
     //remote_path: String
+}
+#[derive(Serialize, Deserialize)]
+pub struct Storage {
+    total_size: u16, // Max 65535 GB -> 65.5 TB
+    used_size: u16
 }
 
 fn read_config() -> Result<Config> {
@@ -238,4 +251,82 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     channel.wait_close()?;
 
     Ok(())
+}
+pub fn server_info() -> Result<String> {
+    let home_dir = dirs::home_dir().expect("Error msg");
+    let auth: bool;
+    let storage: Storage;
+    // Read config
+    let config = read_config()?;
+
+    // Check if server is ON
+    let ping_command = Command::new("ping")
+        .arg("-c1")
+        .arg(format!("{}",config.host.to_string()))
+        .arg("-w3") // Ping wait 3 seconds
+        .status();
+    
+    // If server doesn't response
+    if !ping_command.is_ok() {
+        let server = serde_json::to_string(&Server {
+            status: false,
+            address: config.host.to_string().parse().expect("0.0.0.0"),
+            port: config.port,
+            authenticated: false,
+            storage: Storage { total_size: 0, used_size: 0 }
+        })?;
+        return Ok(server)
+    }
+
+    // Check if can login with key file
+    let tcp = TcpStream::connect(format!("{}:{}", config.host, config.port)).unwrap();
+    let mut sess = Session::new().unwrap();
+    sess.set_tcp_stream(tcp);
+    sess.handshake().unwrap();
+
+    sess.userauth_pubkey_file(
+        &config.user,
+        None,
+        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
+        None,
+    ).unwrap();
+
+    if sess.authenticated() {
+        auth = true
+    } else {
+        auth = false
+    }
+
+    // Get server storage info
+    if auth {
+        let mut total_size: u16 = 0;
+        let mut used_size: u16 = 0;
+        let mut channel = sess.channel_session().unwrap();
+        channel.exec("df -h .").unwrap();
+        let mut output = String::new();
+        channel.read_to_string(&mut output).unwrap();
+        channel.wait_close().unwrap();
+
+        for line in output.lines() {
+            if !line.contains("Filesystem") && !line.trim().is_empty() {
+                let fields: Vec<&str> = line.split_whitespace().collect();
+                total_size = fields[1][..fields[1].len() - 1].parse().unwrap();
+                used_size = fields[2][..fields[2].len() - 1].parse().unwrap();
+            }
+        }
+        storage = Storage { total_size, used_size }
+    } else {
+        storage = Storage { total_size: 0, used_size: 0 }
+    }
+
+    // Return server info
+    let server = serde_json::to_string(&Server {
+        status: true,
+        address: config.host.to_string().parse().expect("0.0.0.0"),
+        port: config.port,
+        authenticated: auth,
+        storage
+    })?;
+
+    Ok(server)
 }
