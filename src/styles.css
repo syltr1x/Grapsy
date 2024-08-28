@@ -88,9 +88,9 @@ form {
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
-  margin: 3rem 20%;
+  margin: 3rem 10%;
   max-height: 80vh;
-  width: 60%;
+  width: 80%;
 }
 form button {
   width: 80%;
