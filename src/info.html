@@ -7,30 +7,6 @@
     integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==",
     crossorigin="anonymous">
     <script type="module" src="/main.js" defer></script>
-    <script>
-      addEventListener('DOMContentLoaded', () => {
-        async function get_server_info() {
-          const { invoke } = window.__TAURI__.tauri;
-          const server = JSON.parse(await invoke('get_server_info'))
-          console.log(server)
-
-          if (server.address != "0.0.0.0") {
-            document.querySelector('#address').innerHTML = `Address: ${server.address}:${server.port}`;
-          }
-          if (server.status) {
-            document.querySelector('#status').innerHTML = "Server status: On";
-          }
-          if (server.authenticated) {
-            let storage_width = server.storage.used_size*480/server.storage.total_size
-            document.querySelector('#storage').innerHTML = `Server storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
-            document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}px`);
-            document.querySelector('#key').innerHTML = "Server key status: authenticated";
-            document.querySelector('#warn').hidden = true;
-          }
-        }
-        get_server_info()
-      })
-    </script>
   </head>
   <body class="charge">
     <div id="sidebar" class="">
@@ -56,8 +32,12 @@
 				<h2 id="status">Server status: Off</h2>
         <h2 id="storage">Server storage: No accessed</h2>
         <div id="storage_bar"></div>
-        <h2 id ="key">Server key status: no authenticated</h2>
-        <p id='warn'><i class="fa-solid fa-triangle-exclamation"></i> Please create key and auth to server to use the program</p>
+        <h2 id="key">Server key Status: no-key</h2>
+        <br><br> 
+        <div id="warn">
+          <h4><i class="fa-solid fa-triangle-exclamation"></i> Please create key and authenticate to server to use the program.</h4>
+          <a id="rd-create" href="create_key.html">To create key and send to server</a>
+        </div>
         <br>
       </form>
     </div>

@@ -93,6 +93,25 @@ if (filesButton !== null) {
       sendButton.disabled = false;
     }
   });
+  // Button logic if no files selected
+  sendButton.addEventListener('mouseenter', (e) => {
+    e.preventDefault()
+    if (sendButton.disabled) {
+      sendButton.innerHTML = '<i class="fa-solid fa-ban"></i> Please select files first';
+    }
+  })
+  sendButton.addEventListener('mouseleave', (e) => {
+    e.preventDefault()
+    sendButton.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Upload Files';
+  })
+  // Send files (if they're selected)
+  sendButton.addEventListener('click', () => {
+    const remotePath = document.querySelector('#remote_path');
+    if (filesList === null) {alert('Error: No files to upload \n Please select files first')}
+    Object.keys(filesList.forEach(key => {
+      invoke('enviar', { archivoLocal: filesList[key] , archivoRemoto: remotePath.value})
+    }))
+  })
 }
 
 // Process every file (write and store path)
@@ -110,25 +129,36 @@ function processFile(files) {
   });
 }
 
-// Button logic if no files selected
-sendButton.addEventListener('mouseenter', (e) => {
-  e.preventDefault()
-  if (sendButton.disabled) {
-    sendButton.innerHTML = '<i class="fa-solid fa-ban"></i> Please select files first';
+// --- Get server info (for info.html)
+const storageBar = document.querySelector('#storage_bar')
+if (storageBar !== null) {
+  async function get_server_info() {
+    const { invoke } = window.__TAURI__.tauri;
+    const response = await invoke('get_server_info')
+    let server
+    try {
+      server = JSON.parse(response)
+    } catch {
+      alert(response)
+      return 1
+    }
+
+    if (server.address != "0.0.0.0") {
+      document.querySelector('#address').innerHTML = `Address: ${server.address}:${server.port}`;
+    }
+    if (server.status) {
+      document.querySelector('#status').innerHTML = "Server status: On";
+    }
+    if (server.authenticated) {
+      let storage_width = server.storage.used_size*480/server.storage.total_size
+      document.querySelector('#storage').innerHTML = `Server storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
+      document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}px`);
+      document.querySelector('#key').innerHTML = "Server key status: Authenticated";
+      document.querySelector('#warn').hidden = true;
+    }
   }
-})
-sendButton.addEventListener('mouseleave', (e) => {
-  e.preventDefault()
-  sendButton.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Upload Files';
-})
-// Send files (if they're selected)
-sendButton.addEventListener('click', () => {
-  const remotePath = document.querySelector('#remote_path');
-  if (filesList === null) {alert('Error: No files to upload \n Please select files first')}
-  Object.keys(filesList.forEach(key => {
-    invoke('enviar', { archivoLocal: filesList[key] , archivoRemoto: remotePath.value})
-  }))
-})
+  get_server_info()
+}
 
 function receive_file() {
   const filePath = document.querySelector('#file_path');
