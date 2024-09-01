@@ -291,11 +291,7 @@ pub fn server_info() -> Result<String> {
         None,
     ).unwrap();
 
-    if sess.authenticated() {
-        auth = true
-    } else {
-        auth = false
-    }
+    auth = sess.authenticated();
 
     // Get server storage info
     if auth {
