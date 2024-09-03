@@ -217,7 +217,7 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
         .arg(format!("-trsa"))
         .arg(format!("-b4096"))
         .arg(format!("-C'{}'", desc))
-        .arg(format!("-f{}/.ssh/id_rsa", home_dir.display()))
+        .arg(format!("-f{}/.ssh/{}_server_rsa", home_dir.display(), user.trim()))
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()?;
@@ -234,11 +234,11 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     //    println!("Err: Authentication failed :(");
     //}
 
-    while !Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
+    while !Path::new(&format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), user.trim())).exists() {
         thread::sleep(Duration::from_millis(500));
     }
 
-    let mut local_file = File::open(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?;
+    let mut local_file = File::open(format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), user.trim()))?;
     let mut file_content = Vec::new();
     local_file.read_to_end(&mut file_content)?;
 
@@ -284,14 +284,14 @@ pub fn server_info() -> Result<String> {
     sess.set_tcp_stream(tcp);
     sess.handshake().unwrap();
 
-    if !Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
+    if !Path::new(&format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), config.user)).exists() {
         return Ok("Err: key file not found".to_string())
     }
 
     sess.userauth_pubkey_file(
         &config.user,
         None,
-        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
+        Path::new(&format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), config.user)),
         None,
     ).unwrap();
 
