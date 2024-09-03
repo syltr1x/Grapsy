@@ -242,13 +242,15 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     let mut file_content = Vec::new();
     local_file.read_to_end(&mut file_content)?;
 
-    let mut channel = sess.channel_session()?;
-    let command = format!("cat > /home/{}/.ssh/authorized_keys", user.trim()); 
-    channel.exec(&command)?;
-    channel.write_all(&file_content)?;
+    let mut remote_file = sess.scp_send(Path::new(&format!("/home/{}/.ssh/authorized_keys",
+            user.trim())), 0o644, 10, None).unwrap();
 
-    channel.send_eof()?;
-    channel.wait_close()?;
+    remote_file.write_all(&file_content).unwrap();
+
+    remote_file.send_eof().unwrap();
+    remote_file.wait_eof().unwrap();
+    remote_file.close().unwrap();
+    remote_file.wait_close().unwrap();
 
     Ok(())
 }
