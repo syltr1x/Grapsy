@@ -1,3 +1,4 @@
+use std::fs::metadata;
 use std::{fs, thread};
 use std::path::Path;
 use std::net::{Ipv4Addr, TcpStream};
@@ -212,12 +213,15 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
 
 pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()> {
     let home_dir = dirs::home_dir().expect("Error msg");
+    // Rename existent key file
+
+
     // Create key
-     let _create_key = Command::new("ssh-keygen")
+    let _create_key = Command::new("ssh-keygen")
         .arg(format!("-trsa"))
         .arg(format!("-b4096"))
         .arg(format!("-C'{}'", desc))
-        .arg(format!("-f{}/.ssh/{}_server_rsa", home_dir.display(), user.trim()))
+        .arg(format!("-f{}/.ssh/id_rsa", home_dir.display()))
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()?;
@@ -234,19 +238,25 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     //    println!("Err: Authentication failed :(");
     //}
 
-    while !Path::new(&format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), user.trim())).exists() {
+    // Wait while key file isn't created
+    while !Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
         thread::sleep(Duration::from_millis(500));
     }
 
-    let mut local_file = File::open(format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), user.trim()))?;
+    // Open key file and read content
+    let mut local_file = File::open(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?;
     let mut file_content = Vec::new();
     local_file.read_to_end(&mut file_content)?;
 
-    let mut remote_file = sess.scp_send(Path::new(&format!("/home/{}/.ssh/authorized_keys",
-            user.trim())), 0o644, 10, None).unwrap();
+    // Key file size
+    let file_size: u64 = metadata(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?.len();
 
+    // Send file using SCP
+    let mut remote_file = sess.scp_send(Path::new(&format!("/home/{}/.ssh/authorized_keys",
+            user.trim())), 0o644, file_size, None).unwrap();
     remote_file.write_all(&file_content).unwrap();
 
+    // Close connection
     remote_file.send_eof().unwrap();
     remote_file.wait_eof().unwrap();
     remote_file.close().unwrap();
@@ -286,14 +296,14 @@ pub fn server_info() -> Result<String> {
     sess.set_tcp_stream(tcp);
     sess.handshake().unwrap();
 
-    if !Path::new(&format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), config.user)).exists() {
+    if !Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
         return Ok("Err: key file not found".to_string())
     }
 
     sess.userauth_pubkey_file(
         &config.user,
         None,
-        Path::new(&format!("{}/.ssh/{}_server_rsa.pub", home_dir.display(), config.user)),
+        Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())),
         None,
     ).unwrap();
 
