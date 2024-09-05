@@ -300,14 +300,14 @@ pub fn server_info() -> Result<String> {
     sess.set_tcp_stream(tcp);
     sess.handshake().unwrap();
 
-    if !Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
+    if !Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
         return Ok("Err: key file not found".to_string())
     }
 
     sess.userauth_pubkey_file(
         &config.user,
         None,
-        Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())),
+        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
         None,
     ).unwrap();
 
