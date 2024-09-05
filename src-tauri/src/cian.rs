@@ -213,8 +213,12 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
 
 pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()> {
     let home_dir = dirs::home_dir().expect("Error msg");
-    // Rename existent key file
 
+    // Rename existent key file
+    if Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
+        let _ = fs::rename(format!("{}/.ssh/id_rsa", home_dir.display()), format!("{}/.ssh/id_rsa.old", home_dir.display()))?;
+        let _ = fs::rename(format!("{}/.ssh/id_rsa.pub", home_dir.display()), format!("{}/.ssh/id_rsa.pub.old", home_dir.display()))?;
+    }
 
     // Create key
     let _create_key = Command::new("ssh-keygen")
