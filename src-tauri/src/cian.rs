@@ -276,24 +276,16 @@ pub fn server_info() -> Result<String> {
     let config = read_config()?;
 
     // Check if server is ON
-    let ping_command = Command::new("ping")
-        .arg("-c1")
-        .arg(format!("{}",config.host.to_string()))
-        .arg("-w3") // Ping wait 3 seconds
-        .status();
-    
-    // If server doesn't response
-    if !ping_command.is_ok() {
-        let server = serde_json::to_string(&Server {
+    if let Err(_) = TcpStream::connect(format!("{}:{}", config.host, config.port)) {
+        return Ok(serde_json::to_string(&Server {
             status: false,
             address: config.host.to_string().parse().expect("0.0.0.0"),
             port: config.port,
             authenticated: false,
             storage: Storage { total_size: 0, used_size: 0 }
-        })?;
-        return Ok(server)
+        })?);
     }
-
+    
     // Check if can login with key file
     let tcp = TcpStream::connect(format!("{}:{}", config.host, config.port)).unwrap();
     let mut sess = Session::new().unwrap();
