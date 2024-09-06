@@ -155,6 +155,7 @@ if (storageBar !== null) {
       document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}px`);
       document.querySelector('#key').innerHTML = "Server key status: Authenticated";
       document.querySelector('#warn').hidden = true;
+      document.querySelector('#rd-create').hidden = true;
     }
   }
   get_server_info()
