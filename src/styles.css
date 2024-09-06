@@ -38,7 +38,7 @@
   --form-button-shadow-lt: #396cd8;
 
   /* Storage Colors */
-  --storage-width: 0px; /* 0px to 400px */
+  --storage-width: 0%; /* 0px to 400px */
   --storage-back-lt: #384dc3;
   --storage-content-lt:#88ddff;
   --storage-back-dk: #114255;
@@ -62,11 +62,11 @@ a {
 }
 #storage_bar {
   position: relative;
-  width: 400px;
+  width: 90%;
   height: 25px;
   background-color: var(--storage-back-lt);
   overflow: hidden;
-  border-radius: 2rem;
+  border-radius: 0.6rem;
   margin: 8px 0px;
 }
 #storage_bar::before {
@@ -74,7 +74,7 @@ a {
   position: absolute;
   background-color: var(--storage-content-lt);
   height: 25px;
-  border-radius: 2rem;
+  border-radius: 0.6rem;
   width: var(--storage-width);
 }
 #sidebar.dark + #content form #storage_bar {
