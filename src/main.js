@@ -150,9 +150,9 @@ if (storageBar !== null) {
       document.querySelector('#status').innerHTML = "Server status: On";
     }
     if (server.authenticated) {
-      let storage_width = server.storage.used_size*480/server.storage.total_size
+      let storage_width = Math.round(server.storage.used_size*100/server.storage.total_size)
       document.querySelector('#storage').innerHTML = `Server storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
-      document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}px`);
+      document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}%`);
       document.querySelector('#key').innerHTML = "Server key status: Authenticated";
       document.querySelector('#warn').hidden = true;
       document.querySelector('#rd-create').hidden = true;
