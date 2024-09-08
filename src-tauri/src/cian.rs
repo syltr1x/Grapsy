@@ -152,22 +152,29 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
 }
 
 pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
+    let home_dir = dirs::home_dir().expect("Error msg");
     let config = read_config()?;
     let remote_port = config.port;
     let remote_host = config.host;
     let user = config.user;
 
-    let content = fs::read(input_path.trim())?;
+    let content = fs::read(input_path)?;
+    let file_size: u64 = metadata(input_path)?.len();
 
     // Stablish ssh connection
     let tcp = TcpStream::connect(format!("{}:{}", remote_host, remote_port)).unwrap();
     let mut sess = Session::new().unwrap();
     sess.set_tcp_stream(tcp);
     sess.handshake().unwrap();
-    sess.userauth_agent(user.trim()).unwrap();
+    sess.userauth_pubkey_file(
+        &user,
+        None,
+        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
+        None,
+    ).unwrap();
 
     // Write the file
-    let mut remote_file = sess.scp_send(Path::new(&format!("{}/",remote_path.trim())),0o644, 10, None).unwrap();
+    let mut remote_file = sess.scp_send(Path::new(&format!("{}/file.txt",remote_path.trim())),0o644, file_size, None).unwrap();
     remote_file.write(&content)?;
 
     // Close the channel and wait for the whole content to be transferred

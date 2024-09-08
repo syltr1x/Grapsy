@@ -108,9 +108,9 @@ if (filesButton !== null) {
   sendButton.addEventListener('click', () => {
     const remotePath = document.querySelector('#remote_path');
     if (filesList === null) {alert('Error: No files to upload \n Please select files first')}
-    Object.keys(filesList.forEach(key => {
-      invoke('enviar', { archivoLocal: filesList[key] , archivoRemoto: remotePath.value})
-    }))
+    for (let file in filesList) {
+      invoke('send_file', { archivoLocal: filesList[file] , archivoRemoto: remotePath.value})
+    }
   })
 }
 
