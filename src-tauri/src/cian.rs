@@ -215,8 +215,10 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     let home_dir = dirs::home_dir().expect("Error msg");
 
     // Rename existent key file
-    if Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
+    if Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
         let _ = fs::rename(format!("{}/.ssh/id_rsa", home_dir.display()), format!("{}/.ssh/id_rsa.old", home_dir.display()))?;
+    }
+    if Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
         let _ = fs::rename(format!("{}/.ssh/id_rsa.pub", home_dir.display()), format!("{}/.ssh/id_rsa.pub.old", home_dir.display()))?;
     }
 
