@@ -6,9 +6,12 @@ mod cian;
 
 // Commands
 #[tauri::command]
-fn send_file(archivo_local: &str, archivo_remoto: &str) {
-    let _ = cian::compress_file(&archivo_local);
-    let _ = cian::send_file(&archivo_local, &archivo_remoto);
+fn send_file(archivo_local: &str, archivo_remoto: &str) -> Result<String, String> {
+    let compressed_file = cian::compress_file(&archivo_local).unwrap();
+    match cian::send_file(&compressed_file, &archivo_remoto) {
+        Ok(response) => Ok(response),
+        Err(_e) => Err("Error".to_string()),
+    }
 }
 #[tauri::command]
 fn receive_file(archivo_local: &str, archivo_remoto: &str) {

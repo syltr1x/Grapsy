@@ -105,11 +105,12 @@ if (filesButton !== null) {
     sendButton.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Upload Files';
   })
   // Send files (if they're selected)
-  sendButton.addEventListener('click', () => {
+  sendButton.addEventListener('click', async() => {
     const remotePath = document.querySelector('#remote_path');
     if (filesList === null) {alert('Error: No files to upload \n Please select files first')}
     for (let file in filesList) {
-      invoke('send_file', { archivoLocal: filesList[file] , archivoRemoto: remotePath.value})
+      let response = await invoke('send_file', { archivoLocal: filesList[file] , archivoRemoto: remotePath.value})
+      alert(response)
     }
   })
 }
