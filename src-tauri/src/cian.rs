@@ -119,9 +119,10 @@ pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remo
 
     Ok("".to_string())
 }
-pub fn compress_file(input_path: &str) -> Result<()> {
+pub fn compress_file(input_path: &str) -> Result<String> {
     let mut input_file = File::open(input_path)?;
-    let output_file = File::create(format!("{}.zst", input_path))?;
+    let output_path = format!("{}.zst", input_path);
+    let output_file = File::create(&output_path)?;
     let mut encoder = Encoder::new(output_file, 0)?;
     
     let mut buffer = [0; 4096];
@@ -133,7 +134,7 @@ pub fn compress_file(input_path: &str) -> Result<()> {
     }
     
     encoder.finish()?;
-    Ok(())
+    Ok(output_path)
 }
 pub fn decompress_file(input_path: &str) -> Result<()> {
     let input_file = File::open(input_path)?;
@@ -151,13 +152,14 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
     Ok(())
 }
 
-pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
+pub fn send_file(input_path: &str, remote_path: &str) -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
     let config = read_config()?;
     let remote_port = config.port;
     let remote_host = config.host;
     let user = config.user;
 
+    // Get content and size of local file
     let content = fs::read(input_path)?;
     let file_size: u64 = metadata(input_path)?.len();
 
@@ -173,17 +175,28 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<()> {
         None,
     ).unwrap();
 
-    // Write the file
-    let mut remote_file = sess.scp_send(Path::new(&format!("{}/file.txt",remote_path.trim())),0o644, file_size, None).unwrap();
-    remote_file.write(&content)?;
+    let input_file = Path::new(&input_path);
+    let file_name = input_file.file_name();
 
-    // Close the channel and wait for the whole content to be transferred
-    remote_file.send_eof().unwrap();
-    remote_file.wait_eof().unwrap();
-    remote_file.close().unwrap();
-    remote_file.wait_close().unwrap();
+    if let Some(file_name) = file_name {
+        // Write the file
+        let mut remote_file = sess.scp_send(Path::new(&format!("{}/{}", remote_path,
+                file_name.to_string_lossy())), 0o644, file_size, None).unwrap();
+        remote_file.write(&content)?;
 
-    Ok(())
+        // Close the channel and wait for the whole content to be transferred
+        remote_file.send_eof().unwrap();
+        remote_file.wait_eof().unwrap();
+        remote_file.close().unwrap();
+        remote_file.wait_close().unwrap();
+
+        // Remove Original file
+        fs::remove_file(input_path)?;
+
+        Ok("Successed: File sent to server.".to_string())
+    } else {
+        Ok("Err: File name not accessible".to_string())
+    }
 }
 
 pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
