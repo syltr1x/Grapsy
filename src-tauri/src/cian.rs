@@ -136,7 +136,7 @@ pub fn compress_file(input_path: &str) -> Result<String> {
     encoder.finish()?;
     Ok(output_path)
 }
-pub fn decompress_file(input_path: &str) -> Result<()> {
+pub fn decompress_file(input_path: &str) -> Result<String> {
     let input_file = File::open(input_path)?;
     let output_path = input_path.strip_suffix(".zst").unwrap_or(input_path);
     let mut output_file = File::create(output_path)?;
@@ -151,7 +151,7 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
     }
 
     fs::remove_file(input_path)?;
-    Ok(())
+    return Ok("File downloaded and decompressed".to_string());
 }
 
 pub fn send_file(input_path: &str, remote_path: &str) -> Result<String> {

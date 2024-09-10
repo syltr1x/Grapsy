@@ -165,7 +165,7 @@ if (storageBar != null) {
 // --- Download file from server ---
 const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
-  receiveButton.addEventListener('click', () => {
+  receiveButton.addEventListener('click', async() => {
     const filePath = document.querySelector('#file_path');
     const remotePath = document.querySelector('#remote_path');
     if (filePath.value.length < 1) {
@@ -173,7 +173,8 @@ if (receiveButton != undefined) {
       return 1
     }
     //texto.innerHTML = `recibiendo: ${filePath.value}...`;
-    invoke('receive_file', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
+    let res = await invoke('receive_file', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
+    alert(res)
     //texto.innerHTML = `${filePath.value} Se recibio correctamente.`;
   })
 }
