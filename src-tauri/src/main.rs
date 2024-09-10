@@ -15,8 +15,8 @@ fn send_file(archivo_local: &str, archivo_remoto: &str) -> Result<String, String
 }
 #[tauri::command]
 fn receive_file(archivo_local: &str, archivo_remoto: &str) {
-    let _ = cian::receive_file(&archivo_local, &archivo_remoto);
-    let _ = cian::decompress_file(&archivo_local);
+    let downloaded_file = cian::receive_file(&archivo_local, &archivo_remoto).unwrap();
+    let _ = cian::decompress_file(&downloaded_file.to_owned());
 }
 #[tauri::command]
 fn read_config() -> Result<String, String> {

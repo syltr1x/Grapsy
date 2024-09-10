@@ -132,7 +132,7 @@ function processFile(files) {
 
 // --- Get server info (for info.html)
 const storageBar = document.querySelector('#storage_bar')
-if (storageBar !== null) {
+if (storageBar != null) {
   async function get_server_info() {
     const { invoke } = window.__TAURI__.tauri;
     const response = await invoke('get_server_info')
@@ -162,14 +162,18 @@ if (storageBar !== null) {
   get_server_info()
 }
 
-function receive_file() {
-  const filePath = document.querySelector('#file_path');
-  const remotePath = document.querySelector('#remote_path');
-  if (filePath.value.length < 1) {
-    texto.innerHTML = `La ruta del archivo no puede estar vacia.`;
-    return 1
-  }
-  texto.innerHTML = `recibiendo: ${filePath.value}...`;
-  invoke('recibir', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
-  texto.innerHTML = `${filePath.value} Se recibio correctamente.`;
+// --- Download file from server ---
+const receiveButton = document.querySelector('#receive_file')
+if (receiveButton != undefined) {
+  receiveButton.addEventListener('click', () => {
+    const filePath = document.querySelector('#file_path');
+    const remotePath = document.querySelector('#remote_path');
+    if (filePath.value.length < 1) {
+      alert(`La ruta del archivo no puede estar vacia.`);
+      return 1
+    }
+    //texto.innerHTML = `recibiendo: ${filePath.value}...`;
+    invoke('receive_file', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
+    //texto.innerHTML = `${filePath.value} Se recibio correctamente.`;
+  })
 }

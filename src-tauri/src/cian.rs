@@ -141,7 +141,7 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
     let output_path = input_path.strip_suffix(".zst").unwrap_or(input_path);
     let mut output_file = File::create(output_path)?;
     let mut decoder = Decoder::new(input_file)?;
-    
+
     let mut buffer = [0; 4096];
     while let Ok(bytes_read) = decoder.read(&mut buffer) {
         if bytes_read == 0 {
@@ -149,6 +149,8 @@ pub fn decompress_file(input_path: &str) -> Result<()> {
         }
         output_file.write_all(&buffer[..bytes_read])?;
     }
+
+    fs::remove_file(input_path)?;
     Ok(())
 }
 
@@ -199,7 +201,8 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<String> {
     }
 }
 
-pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
+pub fn receive_file(local_path: &str, remote_path: &str) -> Result<String> {
+    let home_dir = dirs::home_dir().expect("Error msg");
     let config = read_config()?;
     let remote_port = config.port;
     let remote_host = config.host;
@@ -209,17 +212,28 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
     let tcp = TcpStream::connect(format!("{}:{}", remote_host, remote_port)).unwrap();
     let mut sess = Session::new().unwrap();
     sess.set_tcp_stream(tcp);
-    sess.handshake().unwrap();
-    sess.userauth_agent(&user).unwrap();
+    sess.handshake()?;
+
+    sess.userauth_pubkey_file(
+        &user,
+        None,
+        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
+        None,
+    ).unwrap();
 
     // Read remote file
-    let (mut remote_file, stat) = sess.scp_recv(Path::new(remote_path)).unwrap();
-    println!("remote file size: {}", stat.size());
+    let (mut remote_file, _stat) = sess.scp_recv(Path::new(remote_path)).unwrap();
     let mut contents = Vec::new();
     remote_file.read_to_end(&mut contents).unwrap();
 
+    // Get filename of remote_path
+    let file_name = Path::new(remote_path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("");
+
     // Save local file
-    let mut local_file = File::create(local_path).unwrap();
+    let mut local_file = File::create(format!("{}/{}", local_path, file_name)).unwrap();
     local_file.write_all(&contents).unwrap();
 
     // Close the channel and wait for the whole content to be tranferred
@@ -228,7 +242,7 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<()> {
     remote_file.close().unwrap();
     remote_file.wait_close().unwrap();
 
-    Ok(())
+    Ok(format!("{}/{}", local_path, file_name))
 }
 
 pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()> {
