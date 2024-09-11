@@ -172,9 +172,40 @@ if (receiveButton != undefined) {
       alert(`La ruta del archivo no puede estar vacia.`);
       return 1
     }
-    //texto.innerHTML = `recibiendo: ${filePath.value}...`;
     let res = await invoke('receive_file', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
     alert(res)
-    //texto.innerHTML = `${filePath.value} Se recibio correctamente.`;
+  })
+}
+
+// --- Update config ---
+const updconfigButton = document.querySelector('#write_config')
+if (updconfigButton != undefined) {
+  async function fill_values() {
+    const user_field = document.querySelector('#server_user');
+    const host_field = document.querySelector('#server_address');
+    const port_field = document.querySelector('#server_port');
+    const local_field = document.querySelector('#local_path');
+    const remote_field = document.querySelector('#remote_path');
+
+    const data = JSON.parse(await invoke('read_config'))
+
+    user_field.value = data.user;
+    host_field.value = data.host;
+    port_field.value = data.port;
+    local_field.value = data.local_path;
+    remote_field.value = data.remote_path;
+  }
+  addEventListener('DOMContentLoaded', () => {
+    fill_values()
+  })
+  updconfigButton.addEventListener('click', async() => {
+    const user = document.querySelector('#server_user').value;
+    const address = document.querySelector('#server_address').value;
+    const port = document.querySelector('#server_port').value;
+    const localFolder = document.querySelector('#local_path').value;
+    const remoteFolder = document.querySelector('#remote_path').value;
+
+    let res = await invoke('write_config', {user: user, host: address, port: port, localFolder: localFolder, remoteFolder: remoteFolder})
+    alert(res)
   })
 }
