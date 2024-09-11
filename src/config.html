@@ -26,14 +26,15 @@
       addEventListener('DOMContentLoaded', () => {
         fill_values()
       })
-      function write_config() {
+      async function write_config() {
         const user = document.querySelector('#server_user').value;
         const address = document.querySelector('#server_address').value;
         const port = document.querySelector('#server_port').value;
         const localFolder = document.querySelector('#local_path').value;
         const remoteFolder = document.querySelector('#remote_path').value;
 
-        invoke('write_config', {user: user, host: address, port: port, localFolder: localFolder, remoteFolder: remoteFolder})
+        let res = await invoke('write_config', {user: user, host: address, port: port, localFolder: localFolder, remoteFolder: remoteFolder})
+        alert(res)
       }
     </script>
   <script type="module" src="/main.js" defer></script>

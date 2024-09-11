@@ -117,7 +117,7 @@ pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remo
     file.write_all(format!("user={}\nhost={}\nport={}\nlocal_path={}\nremote_path={}",
         user, host, port, local_folder, remote_folder).as_bytes())?;
 
-    Ok("".to_string())
+    Ok("Config written succesfully.".to_string())
 }
 pub fn compress_file(input_path: &str) -> Result<String> {
     // Set input and output path

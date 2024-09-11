@@ -29,8 +29,11 @@ fn read_config() -> Result<String, String> {
     }
 }
 #[tauri::command]
-fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_folder: &str) {
-    let _ = cian::write_config(user, host, port, local_folder, remote_folder);
+fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_folder: &str) -> Result<String, String> {
+    match cian::write_config(user, host, port, local_folder, remote_folder) {
+        Ok(res) => Ok(res),
+        Err(e) => Err(format!("Error writing config: {}", e)),
+    }
 }
 #[tauri::command]
 fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) {
