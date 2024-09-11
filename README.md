@@ -1,11 +1,5 @@
-## Cian v0.4
+## Cian v0.5 (New release🎉)
 A rust-based CLI app for compress and transfer files to server using SCP (Secure Copy Protocol)
-
-### Requisites to v0.5:
-- [x] Fix some cian-base functions
-- [x] Improve logs
-- [x] Improve Frontend functions
-- [x] Stylize UI
 
 ### Requisites to v0.6:
 - [ ] Add cian icons
