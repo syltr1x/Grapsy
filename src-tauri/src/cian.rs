@@ -120,10 +120,19 @@ pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remo
     Ok("".to_string())
 }
 pub fn compress_file(input_path: &str) -> Result<String> {
+    // Set input and output path
     let mut input_file = File::open(input_path)?;
     let output_path = format!("{}.zst", input_path);
     let output_file = File::create(&output_path)?;
-    let mut encoder = Encoder::new(output_file, 0)?;
+
+    // Get availables logical cores
+    let logical_cores = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1);
+
+    // Create encoder
+    let mut encoder = Encoder::new(output_file, 10)?;
+    encoder.multithread(logical_cores.try_into().unwrap())?;
     
     let mut buffer = [0; 4096];
     while let Ok(bytes_read) = input_file.read(&mut buffer) {
