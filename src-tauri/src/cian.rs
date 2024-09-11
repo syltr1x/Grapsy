@@ -254,15 +254,17 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<String> {
     Ok(format!("{}/{}", local_path, file_name))
 }
 
-pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<()> {
+pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
 
     // Rename existent key file
     if Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
-        let _ = fs::rename(format!("{}/.ssh/id_rsa", home_dir.display()), format!("{}/.ssh/id_rsa.old", home_dir.display()))?;
+        let _ = fs::rename(format!("{}/.ssh/id_rsa",
+            home_dir.display()), format!("{}/.ssh/id_rsa.old", home_dir.display()))?;
     }
     if Path::new(&format!("{}/.ssh/id_rsa.pub", home_dir.display())).exists() {
-        let _ = fs::rename(format!("{}/.ssh/id_rsa.pub", home_dir.display()), format!("{}/.ssh/id_rsa.pub.old", home_dir.display()))?;
+        let _ = fs::rename(format!("{}/.ssh/id_rsa.pub",
+            home_dir.display()), format!("{}/.ssh/id_rsa.pub.old", home_dir.display()))?;
     }
 
     // Create key
@@ -284,7 +286,7 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     sess.userauth_password(user.trim(), password.trim())?;
 
     //if !sess.authenticated() {
-    //    println!("Err: Authentication failed :(");
+    //    return Err("Check user and password".to_string())
     //}
 
     // Wait while key file isn't created
@@ -311,7 +313,7 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     remote_file.close().unwrap();
     remote_file.wait_close().unwrap();
 
-    Ok(())
+    Ok("Authenticated in the server".to_string())
 }
 pub fn server_info() -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");

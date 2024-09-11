@@ -36,8 +36,11 @@ fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_f
     }
 }
 #[tauri::command]
-fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) {
-    let _ = cian::send_key(desc, user, password, address, port);
+fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<String, String> {
+    match cian::send_key(desc, user, password, address, port) {
+        Ok(res) => Ok(res),
+        Err(e) => Err(format!("Error authenticating in server: {}", e)),
+    }
 }
 #[tauri::command]
 fn get_server_info() -> Result<String, String>{

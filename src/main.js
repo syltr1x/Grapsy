@@ -209,3 +209,32 @@ if (updconfigButton != undefined) {
     alert(res)
   })
 }
+// -- Authenticate user in server ---
+const newkeyButton = document.querySelector('#create_key')
+if (newkeyButton != undefined) {
+  // Charge configured values
+  async function fill_values() {
+    const user_field = document.querySelector('#username');
+    const host_field = document.querySelector('#address');
+    const port_field = document.querySelector('#port');
+    const data = JSON.parse(await invoke('read_config'))
+
+    user_field.value = data.user;
+    host_field.value = data.host;
+    port_field.value = data.port;
+  }
+  addEventListener('DOMContentLoaded', () => {
+    fill_values()
+  })
+
+  newkeyButton.addEventListener('click', async() => {
+    const description = document.querySelector('#description').value;
+    const username = document.querySelector('#username').value;
+    const password = document.querySelector('#password').value;
+    const address = document.querySelector('#address').value;
+    const port = document.querySelector('#port').value;
+
+    let res = await invoke('send_key', { desc: description, user: username, password: password, address: address, port: port})
+    alert(res)
+  })
+}
