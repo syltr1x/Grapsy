@@ -272,7 +272,10 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
         .arg(format!("-trsa"))
         .arg(format!("-b4096"))
         .arg(format!("-C'{}'", desc))
+        .arg("-mPEM")
         .arg(format!("-f{}/.ssh/id_rsa", home_dir.display()))
+        .arg("-N")
+        .arg("")
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()?;
@@ -342,7 +345,7 @@ pub fn server_info() -> Result<String> {
     if !Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
         return Ok("Err: key file not found".to_string())
     }
-
+    
     sess.userauth_pubkey_file(
         &config.user,
         None,
