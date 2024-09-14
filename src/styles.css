@@ -8,15 +8,15 @@
   /* Sidebar Colors */
   /* dk=dark    lt=light */
   --sidebar-width: 240px;
-  --sidebar-back-dk: #242536;
-  --sidebar-hover-dk: #1a3143ee;
-  --sidebar-focus-dk: #214b5266;
-  --sidebar-dark: #1f1f28;
+  --sidebar-back-dk: #260d25;
+  --sidebar-hover-dk: #431041;
+  --sidebar-focus-dk: #422735;
+  --sidebar-dark: #1d0d1d;
 
-  --sidebar-back-lt: #383b69;
-  --sidebar-hover-lt: #2f5878ee;
-  --sidebar-focus-lt: #357b8766;
-  --sidebar-light: #37374a;
+  --sidebar-back-lt: #556b57;
+  --sidebar-hover-lt: #5b8860ee;
+  --sidebar-focus-lt: #3f5a42aa;
+  --sidebar-light: #475f49;
 
   /* Content Colors */
   --content-back-dk: #111; 
@@ -26,23 +26,20 @@
   --content-color-lt: #111;
 
   /* Form Colors */
-  --form-input-focus-dk: #1a3143;
-  --form-button-back-dk: #194952;
-  --form-button-hover-dk: #045766;
-  --form-button-shadow-dk: #396cd8;
-  
+  --form-input-focus-dk: #2c1834;
+  --form-button-back-dk: #3f5623;
+  --form-button-hover-dk: #202b11;
 
-  --form-input-focus-lt: #77ace8;
-  --form-button-back-lt: #44def2;
-  --form-button-hover-lt: #24aec2; 
-  --form-button-shadow-lt: #396cd8;
+  --form-input-focus-lt: #7c6d8d;
+  --form-button-back-lt: #82a685;
+  --form-button-hover-lt: #648268; 
 
   /* Storage Colors */
   --storage-width: 0%; /* 0px to 400px */
-  --storage-back-lt: #384dc3;
-  --storage-content-lt:#88ddff;
-  --storage-back-dk: #114255;
-  --storage-content-dk: #2693e9;
+  --storage-back-lt: #8F6D88;
+  --storage-content-lt:#A2AD91;
+  --storage-back-dk: #593f62;
+  --storage-content-dk: #404227;
 }
 body.charge {
   display: none;
