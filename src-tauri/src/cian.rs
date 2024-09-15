@@ -1,7 +1,8 @@
 use std::fs::metadata;
+use std::str::FromStr;
 use std::{fs, thread};
 use std::path::Path;
-use std::net::{Ipv4Addr, TcpStream};
+use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 use std::time::Duration;
 use std::fs::File;
 use std::process::{Command, Stdio};
@@ -256,6 +257,7 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<String> {
 
 pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
+    let config = read_config()?;
 
     // Rename existent key file
     if Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
@@ -281,12 +283,15 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
         .spawn()?;
 
     // Send Key to Remote server
-    let tcp = TcpStream::connect(format!("{}:{}", address.trim(), port.trim()))?;
+    let server_address = SocketAddr::from_str(&format!("{}:{}", address, port).to_owned()).unwrap();
+    let timeout = Duration::new(2, 0);
+    let tcp = TcpStream::connect_timeout(&server_address, timeout);
     let mut sess = Session::new()?;
-    sess.set_tcp_stream(tcp);
+    sess.set_tcp_stream(tcp?);
     sess.handshake()?;
+    let mut channel = sess.channel_session().unwrap();
 
-    sess.userauth_password(user.trim(), password.trim())?;
+    sess.userauth_password(user, password.trim())?;
 
     //if !sess.authenticated() {
     //    return Err("Check user and password".to_string())
@@ -306,9 +311,13 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     let file_size: u64 = metadata(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?.len();
 
     // Send file using SCP
-    let mut remote_file = sess.scp_send(Path::new(&format!("/home/{}/.ssh/authorized_keys",
+    let mut remote_file = sess.scp_send(Path::new(&format!("/home/{}/.ssh/grapsy_key",
             user.trim())), 0o644, file_size, None).unwrap();
     remote_file.write_all(&file_content).unwrap();
+
+    // Add new key to remote authorized keys
+    channel.exec(format!("printf '\n%s' \"$(cat /home/{}/.ssh/grapsy_key)\" >> /home/{}/.ssh/authorized_keys",
+        config.user, config.user).as_str()).unwrap();
 
     // Close connection
     remote_file.send_eof().unwrap();
