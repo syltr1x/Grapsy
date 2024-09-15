@@ -1,10 +1,8 @@
-use std::fs::metadata;
 use std::str::FromStr;
 use std::{fs, thread};
 use std::path::Path;
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 use std::time::Duration;
-use std::fs::File;
 use std::process::{Command, Stdio};
 use std::io::{BufReader, Read, Result, Write, BufRead};
 
@@ -44,7 +42,7 @@ pub struct Storage {
 }
 
 fn read_config() -> Result<Config> {
-    let file = File::open("cian.conf")?;
+    let file = fs::File::open("cian.conf")?;
     let reader = BufReader::new(file);
 
     let mut user = String::new();
@@ -79,7 +77,7 @@ fn read_config() -> Result<Config> {
     Ok(config)
 }
 pub fn read_config_json() -> Result<String> {
-    let file = File::open("cian.conf")?;
+    let file = fs::File::open("cian.conf")?;
     let reader = BufReader::new(file);
 
     let mut user = String::new();
@@ -114,7 +112,7 @@ pub fn read_config_json() -> Result<String> {
     Ok(config_json)
 }
 pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_folder: &str) -> Result<String> {
-    let mut file = File::create("cian.conf")?;
+    let mut file = fs::File::create("cian.conf")?;
     file.write_all(format!("user={}\nhost={}\nport={}\nlocal_path={}\nremote_path={}",
         user, host, port, local_folder, remote_folder).as_bytes())?;
 
@@ -122,9 +120,9 @@ pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remo
 }
 pub fn compress_file(input_path: &str) -> Result<String> {
     // Set input and output path
-    let mut input_file = File::open(input_path)?;
+    let mut input_file = fs::File::open(input_path)?;
     let output_path = format!("{}.zst", input_path);
-    let output_file = File::create(&output_path)?;
+    let output_file = fs::File::create(&output_path)?;
 
     // Get availables logical cores
     let logical_cores = std::thread::available_parallelism()
@@ -147,9 +145,9 @@ pub fn compress_file(input_path: &str) -> Result<String> {
     Ok(output_path)
 }
 pub fn decompress_file(input_path: &str) -> Result<String> {
-    let input_file = File::open(input_path)?;
+    let input_file = fs::File::open(input_path)?;
     let output_path = input_path.strip_suffix(".zst").unwrap_or(input_path);
-    let mut output_file = File::create(output_path)?;
+    let mut output_file = fs::File::create(output_path)?;
     let mut decoder = Decoder::new(input_file)?;
 
     let mut buffer = [0; 4096];
@@ -173,7 +171,7 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<String> {
 
     // Get content and size of local file
     let content = fs::read(input_path)?;
-    let file_size: u64 = metadata(input_path)?.len();
+    let file_size: u64 = fs::metadata(input_path)?.len();
 
     // Stablish ssh connection
     let tcp = TcpStream::connect(format!("{}:{}", remote_host, remote_port)).unwrap();
@@ -243,7 +241,7 @@ pub fn receive_file(local_path: &str, remote_path: &str) -> Result<String> {
         .unwrap_or("");
 
     // Save local file
-    let mut local_file = File::create(format!("{}/{}", local_path, file_name)).unwrap();
+    let mut local_file = fs::File::create(format!("{}/{}", local_path, file_name)).unwrap();
     local_file.write_all(&contents).unwrap();
 
     // Close the channel and wait for the whole content to be tranferred
@@ -303,12 +301,12 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     }
 
     // Open key file and read content
-    let mut local_file = File::open(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?;
+    let mut local_file = fs::File::open(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?;
     let mut file_content = Vec::new();
     local_file.read_to_end(&mut file_content)?;
 
     // Key file size
-    let file_size: u64 = metadata(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?.len();
+    let file_size: u64 = fs::metadata(format!("{}/.ssh/id_rsa.pub", home_dir.display()))?.len();
 
     // Send file using SCP
     let mut remote_file = sess.scp_send(Path::new(&format!("/home/{}/.ssh/grapsy_key",
