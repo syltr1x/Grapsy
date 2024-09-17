@@ -283,14 +283,13 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
     // Send Key to Remote server
     let server_address = SocketAddr::from_str(&format!("{}:{}", address, port).to_owned()).unwrap();
     let timeout = Duration::new(2, 0);
-    let tcp = TcpStream::connect_timeout(&server_address, timeout);
+    let tcp = TcpStream::connect_timeout(&server_address, timeout).unwrap();
     let mut sess = Session::new()?;
-    sess.set_tcp_stream(tcp?);
+    sess.set_tcp_stream(tcp);
     sess.handshake()?;
-    let mut channel = sess.channel_session().unwrap();
-
     sess.userauth_password(user, password.trim())?;
 
+    let mut channel = sess.channel_session().unwrap();
     //if !sess.authenticated() {
     //    return Err("Check user and password".to_string())
     //}
