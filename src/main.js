@@ -1,4 +1,4 @@
-const { appWindow, invoke } = window.__TAURI__.tauri;
+const { invoke } = window.__TAURI__.tauri;
 const { open } = window.__TAURI__.dialog;
 
 // --- Pre load Functions ---
@@ -134,7 +134,6 @@ function processFile(files) {
 const storageBar = document.querySelector('#storage_bar')
 if (storageBar != null) {
   async function get_server_info() {
-    const { invoke } = window.__TAURI__.tauri;
     const response = await invoke('get_server_info')
     let server
     try {
@@ -159,7 +158,11 @@ if (storageBar != null) {
       document.querySelector('#rd-create').hidden = true;
     }
   }
-  get_server_info()
+
+  const checkKey = await invoke('check_rsa_key')
+  if (checkKey) {
+    get_server_info()
+  }
 }
 
 // --- Download file from server ---
