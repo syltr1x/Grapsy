@@ -1,7 +1,6 @@
-use std::str::FromStr;
 use std::{fs, thread};
 use std::path::Path;
-use std::net::{Ipv4Addr, SocketAddr, TcpStream};
+use std::net::{Ipv4Addr, TcpStream, ToSocketAddrs};
 use std::time::Duration;
 use std::process::{Command, Stdio};
 use std::io::{BufReader, Read, Result, Write, BufRead};
@@ -280,10 +279,21 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
         .stderr(Stdio::null())
         .spawn()?;
 
+
+    // Try resolve hostname if it is
+    let sv_address = match format!("{}:{}", address, port).to_socket_addrs() {
+        Ok(mut addrs) => {
+            if let Some(sv_address) = addrs.next() {
+                sv_address.to_string()
+            } else {
+                format!("{}:{}", address, port)
+            }
+        }
+        Err(_) => format!("{}:{}", address, port),
+    };
+
     // Send Key to Remote server
-    let server_address = SocketAddr::from_str(&format!("{}:{}", address, port).to_owned()).unwrap();
-    let timeout = Duration::new(2, 0);
-    let tcp = TcpStream::connect_timeout(&server_address, timeout).unwrap();
+    let tcp = TcpStream::connect(sv_address).unwrap();
     let mut sess = Session::new()?;
     sess.set_tcp_stream(tcp);
     sess.handshake()?;
