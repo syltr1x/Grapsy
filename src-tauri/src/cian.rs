@@ -350,9 +350,23 @@ pub fn server_info() -> Result<String> {
     let storage: Storage;
     // Read config
     let config = read_config()?;
+    let address = &config.host;
+    let port = &config.port;
+
+    // Try resolve hostname if it is
+    let sv_address = match format!("{}:{}", address, port).to_socket_addrs() {
+        Ok(mut addrs) => {
+            if let Some(sv_address) = addrs.next() {
+                sv_address.to_string()
+            } else {
+                format!("{}:{}", address, port)
+            }
+        }
+        Err(_) => format!("{}:{}", address, port),
+    };
 
     // Check if server is ON
-    if let Err(_) = TcpStream::connect(format!("{}:{}", config.host, config.port)) {
+    if let Err(_) = TcpStream::connect(&sv_address) {
         return Ok(serde_json::to_string(&Server {
             status: false,
             address: config.host.to_string().parse().expect("0.0.0.0"),
@@ -363,7 +377,7 @@ pub fn server_info() -> Result<String> {
     }
     
     // Check if can login with key file
-    let tcp = TcpStream::connect(format!("{}:{}", config.host, config.port)).unwrap();
+    let tcp = TcpStream::connect(&sv_address).unwrap();
     let mut sess = Session::new().unwrap();
     sess.set_tcp_stream(tcp);
     sess.handshake().unwrap();
