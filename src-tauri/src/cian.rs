@@ -334,6 +334,16 @@ pub fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &st
 
     Ok("Authenticated in the server".to_string())
 }
+
+pub fn check_rsa_key() -> Result<bool> {
+    let home_dir = dirs::home_dir().expect("Error msg");
+    if Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
+        return Ok(true);
+    } else {
+        return Ok(false);
+    }
+}
+
 pub fn server_info() -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
     let auth: bool;

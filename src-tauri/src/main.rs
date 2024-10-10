@@ -43,16 +43,21 @@ fn send_key(desc: &str, user: &str, password: &str, address: &str, port: &str) -
     }
 }
 #[tauri::command]
-fn get_server_info() -> Result<String, String>{
+fn get_server_info() -> Result<String, String> {
     match cian::server_info() {
         Ok(server) => Ok(server),
         Err(e) => Err(format!("Error reading config: {}", e)),
     }
 }
+#[tauri::command]
+fn check_rsa_key() -> Result<bool, bool> {
+    let key_exist = cian::check_rsa_key().unwrap();
+    Ok(key_exist)
+}
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![send_file, receive_file, read_config, write_config, send_key, get_server_info])
+    .invoke_handler(tauri::generate_handler![send_file, receive_file, read_config, write_config, send_key, get_server_info, check_rsa_key])
     .run(tauri::generate_context!())
     .expect("failed to run app");
 }
