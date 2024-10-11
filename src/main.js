@@ -1,5 +1,6 @@
 const { invoke } = window.__TAURI__.tauri;
 const { open } = window.__TAURI__.dialog;
+const { readDir } = window.__TAURI__.fs;
 
 // --- Pre load Functions ---
 const menuButton = document.querySelector('#toggle');
@@ -77,15 +78,31 @@ if (show_button !== null) {
 
 // --- Select Files ---
 const filesButton = document.querySelector('#file_button');
+const foldersButton = document.querySelector('#folder_button');
 const sendButton = document.querySelector('#send_files');
 let filesList = null;
 
 // Open file explorer to select file/s
 if (filesButton !== null) {
+  // Process every file (write and store path)
+  function processFile(files) {
+    document.querySelector('#preview').innerHTML = "";
+    Object.keys(files).forEach(key => {
+      const fileData = `<div class="file-container">
+      <div class="status">
+        <span class="status-text"><b>${key}: </b> ${files[key]}...</span>
+      </div>
+      </div>`;
+      const html = document.querySelector('#preview');
+      html.innerHTML = fileData + html.innerHTML;
+    });
+  }
+
+  // Process files
   filesButton.addEventListener('click', async () => {
     const selectedFilePath = await open({
       multiple: true
-    });
+    })
 
     if (selectedFilePath) {
       processFile(selectedFilePath);
@@ -93,6 +110,21 @@ if (filesButton !== null) {
       sendButton.disabled = false;
     }
   });
+
+  // Process folders
+  foldersButton.addEventListener('click', async() => {
+    const selectedFolderPath = await open({
+      directory: true,
+      multiple: true
+    })
+
+    if (selectedFolderPath) {
+      processFile(selectedFolderPath);
+      filesList = selectedFolderPath;
+      sendButton.disabled = false;
+    }
+  });
+
   // Button logic if no files selected
   sendButton.addEventListener('mouseenter', (e) => {
     e.preventDefault()
@@ -113,21 +145,6 @@ if (filesButton !== null) {
       alert(response)
     }
   })
-}
-
-// Process every file (write and store path)
-function processFile(files) {
-  document.querySelector('#preview').innerHTML = "";
-  Object.keys(files).forEach(key => {
-    console.log(`File path: ${files[key]}`);
-    const fileData = `<div class="file-container">
-      <div class="status">
-        <span class="status-text"><b>${key}: </b> ${files[key]}...</span>
-      </div>
-    </div>`;
-    const html = document.querySelector('#preview');
-    html.innerHTML = fileData + html.innerHTML;
-  });
 }
 
 // --- Get server info (for info.html)
