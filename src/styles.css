@@ -57,6 +57,13 @@ h1 {
 a { 
   color: inherit;
 }
+#upload_btns {
+  margin: 0px auto;
+  display: grid;
+  grid-template-columns: 2fr 2fr;
+  column-gap: 18px;
+  width: 90%;
+}
 #storage_bar {
   position: relative;
   width: 90%;
