@@ -1,6 +1,5 @@
 const { invoke } = window.__TAURI__.tauri;
 const { open } = window.__TAURI__.dialog;
-const { readDir } = window.__TAURI__.fs;
 
 // --- Pre load Functions ---
 const menuButton = document.querySelector('#toggle');
