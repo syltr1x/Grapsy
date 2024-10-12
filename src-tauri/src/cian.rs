@@ -8,6 +8,7 @@ use std::io::{BufReader, Read, Result, Write, BufRead};
 use dirs;
 use ssh2::Session;
 use zstd::{Encoder, Decoder};
+use tar::Builder;
 use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize)]
@@ -118,10 +119,27 @@ pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remo
     Ok("Config written succesfully.".to_string())
 }
 pub fn compress_file(input_path: &str) -> Result<String> {
-    // Set input and output path
-    let mut input_file = fs::File::open(input_path)?;
-    let output_path = format!("{}.zst", input_path);
+    // Process folder to tar file
+    let metadata_path = fs::metadata(input_path)?;
+    let local_file;
+    if metadata_path.is_dir() {
+        local_file = format!("{}.tar", input_path);
+        let tar_file = fs::File::create(&local_file)?;
+        let mut tar_builder = Builder::new(tar_file);
+
+        tar_builder.append_dir_all(".", input_path)?;
+        tar_builder.finish()?;
+    } else {
+        local_file = input_path.to_string();
+    }
+
+    // Open local file and create file for zst compress
+    let mut input_file = fs::File::open(&local_file)?;
+    let output_path = format!("{}.zst", local_file);
     let output_file = fs::File::create(&output_path)?;
+
+    // Remove tar file
+    fs::remove_file(local_file)?;
 
     // Get availables logical cores
     let logical_cores = std::thread::available_parallelism()
