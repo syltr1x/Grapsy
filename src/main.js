@@ -24,7 +24,7 @@ if (dark_mode && dark_mode === "on") {
 } else {
   darkModeButton.classList.add('fa-sun')
 }
-addEventListener('DOMContentLoaded', () => {
+addEventListener('DOMContentLoaded', async() => {
   const body = document.querySelector('body');
   body.classList.remove('charge')
 })
@@ -83,6 +83,9 @@ let filesList = null;
 
 // Open file explorer to select file/s
 if (filesButton !== null) {
+  const data = JSON.parse(await invoke('read_config'))
+  let remote_field = document.querySelector('#remote_path');
+  remote_field.value = data.remote_path
   // Process every file (write and store path)
   function processFile(files) {
     document.querySelector('#preview').innerHTML = "";
@@ -100,6 +103,8 @@ if (filesButton !== null) {
   // Process files
   filesButton.addEventListener('click', async () => {
     const selectedFilePath = await open({
+      title: "Select file/s",
+      defaultPath: data.local_path,
       multiple: true
     })
 
@@ -113,6 +118,8 @@ if (filesButton !== null) {
   // Process folders
   foldersButton.addEventListener('click', async() => {
     const selectedFolderPath = await open({
+      title: "Select folder/s",
+      defaultPath: data.local_path,
       directory: true,
       multiple: true
     })
@@ -184,11 +191,16 @@ if (storageBar != null) {
 // --- Download file from server ---
 const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
+  const data = JSON.parse(await invoke('read_config'))
+  let remote_field = document.querySelector('#remote_path');
+  let local_field = document.querySelector('#local_path');
+  remote_field.value = data.remote_path
+  local_field.value = data.local_path
   receiveButton.addEventListener('click', async() => {
     const filePath = document.querySelector('#file_path');
     const remotePath = document.querySelector('#remote_path');
     if (filePath.value.length < 1) {
-      alert(`La ruta del archivo no puede estar vacia.`);
+      alert("The path can't be undefined");
       return 1
     }
     let res = await invoke('receive_file', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
