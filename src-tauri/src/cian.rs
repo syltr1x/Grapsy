@@ -1,6 +1,6 @@
 use std::{fs, thread};
 use std::path::Path;
-use std::net::{Ipv4Addr, TcpStream, ToSocketAddrs};
+use std::net::{TcpStream, ToSocketAddrs};
 use std::time::Duration;
 use std::process::{Command, Stdio};
 use std::io::{BufReader, Read, Result, Write, BufRead};
@@ -22,7 +22,7 @@ pub struct ConfigJson {
 #[derive(Serialize, Deserialize)]
 pub struct Server {
     status: bool,
-    address: Ipv4Addr,
+    address: String,
     port: u16,
     authenticated: bool,
     storage: Storage
@@ -32,8 +32,6 @@ pub struct Config {
     user: String,
     host: String,
     port: u16,
-    //local_path: String,
-    //remote_path: String
 }
 #[derive(Serialize, Deserialize)]
 pub struct Storage {
@@ -48,8 +46,6 @@ fn read_config() -> Result<Config> {
     let mut user = String::new();
     let mut host = String::new();
     let mut port = String::new();
-    //let mut local_path = String::new();
-    //let mut remote_path = String::new();
 
     for line in reader.lines() {
         let line = line?;
@@ -59,19 +55,13 @@ fn read_config() -> Result<Config> {
             host = line[5..].to_string();
         } else if line.starts_with("port=") {
             port = line[5..].to_string();
-        }// else if line.starts_with("local_path=") {
-        //    local_path = line[11..].to_string();
-        //} else if line.starts_with("remote_path=") {
-        //    remote_path = line[12..].to_string();
-        //}
+        }
     }
 
     let config = Config {
         user,
         host,
         port:port.trim().parse().unwrap(),
-        //local_path,
-        //remote_path
 };
 
     Ok(config)
