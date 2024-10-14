@@ -109,6 +109,13 @@ pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remo
     Ok("Config written succesfully.".to_string())
 }
 pub fn compress_file(input_path: &str) -> Result<String> {
+    // If file is compressed (like mp3 or similar), skip compression
+    if matches!(Path::new(input_path).extension().and_then(|ext| ext.to_str()),
+    Some("mp3"|"aac"|"ogg"|"jpg"|"jpeg"|"png"|"gif"|"mp4"|"avi"|"mkv"|"zip"|"rar"|
+        "7z"|"exe"|"dll"|"pdf"|"docx"|"iso")) {
+        return Ok(input_path.to_string());
+    }
+
     // Process folder to tar file
     let metadata_path = fs::metadata(input_path)?;
     let local_file;
