@@ -159,6 +159,11 @@ pub fn compress_file(input_path: &str) -> Result<String> {
     Ok(output_path)
 }
 pub fn decompress_file(input_path: &str) -> Result<String> {
+    // Check if the file is compressed or not
+    if Path::new(input_path).extension().map_or(false, |ext| ext == "zst") {
+        return Ok("File downloaded and don't need a decompress".to_string());
+    }
+
     let input_file = fs::File::open(input_path)?;
     let output_path = input_path.strip_suffix(".zst").unwrap_or(input_path);
     let mut output_file = fs::File::create(output_path)?;
