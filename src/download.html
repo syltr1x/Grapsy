@@ -30,6 +30,12 @@
       <form>
         <label for="remote_path">Remote filename</label>
         <input id="remote_path" type="text" placeholder="/folder/resources/filename.txt.zst">
+        <div id="files_container">
+          <h3>Files on "folder"</h3>
+          <button id="refresh-btn"><i class="fa-solid fa-refresh"></i></button>
+          <hr>
+          <ul id="files_list"></ul>
+        </div>
         <label for="local_path">Local file destination (without "/" at the end)</label>
         <input id="local_path" type="text" placeholder="/home/cian/dst">
         <br>
