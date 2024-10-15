@@ -176,12 +176,12 @@ form #show_icon {
   padding: .8rem .6rem;
   width: calc(80% - 1.2rem);
   height: 5rem;
-  border: 1.8px solid var(--form-input-focus-dk);
+  border: 1.8px solid var(--form-input-focus-lt);
   border-radius: 8px;
 }
 #files_container > hr {
   margin-top: 7px;
-  border-color: var(--form-input-focus-dk)
+  border-color: var(--form-input-focus-lt)
 }
 #refresh-btn {
     position: absolute;
@@ -199,6 +199,15 @@ form #show_icon {
     color: white;
     font-size: 1.2em;
     background: var(--form-input-focus-lt);
+}
+#sidebar.dark + #content #files_container {
+  border: 1.8px solid var(--form-input-focus-dk);
+}
+#sidebar.dark + #content #files_container > hr {
+  border-color: var(--form-input-focus-dk);
+}
+#sidebar.dark + #content #refresh-btn {
+  background: var(--form-input-focus-dk);
 }
 #sidebar.dark + #content form input {
   border: 1.8px solid var(--form-input-focus-dk);
