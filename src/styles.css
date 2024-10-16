@@ -96,7 +96,7 @@ form {
   max-height: 80vh;
   width: 80%;
 }
-form > button, #rd-create {
+form > button, #upload_btns > button, #rd-create {
   width: 80%;
   margin: 3rem auto 2rem auto;
   border: none;
@@ -107,7 +107,7 @@ form > button, #rd-create {
   background-color: var(--form-button-back-lt);
   transition: all 0.25s;
 }
-form > button i {
+form > button i, #upload_btns > button i {
   margin-right: 20px;
 }
 form input {
@@ -145,7 +145,7 @@ form label {
 button, #rd-create {
   cursor: pointer;
 }
-form button:hover, #rd-create:hover {
+form button:hover, #upload_btns > button:hover, #rd-create:hover {
   background-color: var(--form-button-hover-lt);
 }
 input,
@@ -216,13 +216,15 @@ form #show_icon {
   border: none;
   border-bottom: 1.8px solid var(--form-input-focus-dk)
 }
-#sidebar.dark + #content form > button {
+#sidebar.dark + #content form > button,
+#sidebar.dark + #content form #upload_btns > button {
   background-color: var(--form-button-back-dk);
 }
 #sidebar.dark + #content #rd-create {
   background-color: var(--form-button-back-dk);
 }
-#sidebar.dark + #content form > button:hover {
+#sidebar.dark + #content form > button:hover,
+#sidebar.dark + #content form #upload_btns > button:hover {
   background-color: var(--form-button-hover-dk);
 }
 #sidebar.dark + #content #rd-create:hover {
