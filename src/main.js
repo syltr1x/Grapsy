@@ -191,11 +191,26 @@ if (storageBar != null) {
 // --- Download file from server ---
 const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
+  const refreshButton = document.querySelector('#refresh-btn')
+  // Load functions
   const data = JSON.parse(await invoke('read_config'))
   let remote_field = document.querySelector('#remote_path');
   let local_field = document.querySelector('#local_path');
   remote_field.value = data.remote_path
   local_field.value = data.local_path
+
+  // Preview files function
+  refreshButton.addEventListener('click', async() => {
+    console.log("va")
+    if (remote_field.value.length < 1) {
+      alert("The path can't be undefined");
+      return 1
+    }
+    let res = await invoke('get_content_folder', { remoteFolder: remote_field.value })
+    console.log(res)
+  })
+  
+  // Download function
   receiveButton.addEventListener('click', async() => {
     const filePath = document.querySelector('#file_path');
     const remotePath = document.querySelector('#remote_path');

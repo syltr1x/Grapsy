@@ -14,6 +14,13 @@ fn send_file(archivo_local: &str, archivo_remoto: &str) -> Result<String, String
     }
 }
 #[tauri::command]
+fn get_content_folder(remote_folder: &str) -> Result<String, String> {
+    match cian::get_content_folder(remote_folder) {
+        Ok(res) => Ok(res),
+        Err(e) => Err(format!("Error getting folder info: {}", e)),
+    }
+}
+#[tauri::command]
 fn receive_file(archivo_local: &str, archivo_remoto: &str) -> Result<String, String> {
     let downloaded_file = cian::receive_file(&archivo_local, &archivo_remoto).unwrap();
     match cian::decompress_file(&downloaded_file.to_owned()) {
@@ -57,7 +64,7 @@ fn check_rsa_key() -> Result<bool, bool> {
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![send_file, receive_file, read_config, write_config, send_key, get_server_info, check_rsa_key])
+    .invoke_handler(tauri::generate_handler![send_file, receive_file, read_config, write_config, send_key, get_server_info, check_rsa_key, get_content_folder])
     .run(tauri::generate_context!())
     .expect("failed to run app");
 }

@@ -228,6 +228,68 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<String> {
     }
 }
 
+pub fn get_content_folder(remote_folder: &str) -> Result<String> {
+    let home_dir = dirs::home_dir().expect("Error msg");
+    let config = read_config()?;
+    let address = config.host;
+    let port = config.port;
+    
+    // Try resolve hostname if it is
+    let sv_address = match format!("{}:{}", address, port).to_socket_addrs() {
+        Ok(mut addrs) => {
+            if let Some(sv_address) = addrs.next() {
+                sv_address.to_string()
+            } else {
+                format!("{}:{}", address, port)
+            }
+        }
+        Err(_) => format!("{}:{}", address, port),
+    };
+
+    // Check if server is ON
+    if let Err(_) = TcpStream::connect(&sv_address) {
+        return Ok("Err: Can't connect with the server".to_string());
+    }
+    
+    // Check if can login with key file
+    let tcp = TcpStream::connect(&sv_address).unwrap();
+    let mut sess = Session::new().unwrap();
+    sess.set_tcp_stream(tcp);
+    sess.handshake().unwrap();
+
+    if !Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
+        return Ok("Err: key file not found".to_string())
+    }
+    
+    sess.userauth_pubkey_file(
+        &config.user,
+        None,
+        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
+        None,
+    ).unwrap();
+
+    // Get server storage info
+    if sess.authenticated() {
+        let mut folders: Vec<&str> = Vec::new();
+        let mut channel = sess.channel_session().unwrap();
+        channel.exec(&format!("ls -l {}", remote_folder)).unwrap();
+        let mut output = String::new();
+        channel.read_to_string(&mut output).unwrap();
+        channel.wait_close().unwrap();
+
+        for line in output.lines() {
+            if line.split_whitespace().count() > 2 && !line.trim().is_empty() {
+                let fields: Vec<&str> = line.split_whitespace().collect();
+                let folder_name = fields[8].trim();
+                folders.push(folder_name);
+            }
+        }
+        return Ok(serde_json::to_string(&folders).unwrap())
+    } else {
+        return Ok("Err authenticating in the server".to_string())
+    }
+}
+
 pub fn receive_file(local_path: &str, remote_path: &str) -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
     let config = read_config()?;
