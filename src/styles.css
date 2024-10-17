@@ -207,6 +207,9 @@ form #show_icon {
     font-size: 1.4em;
     background: var(--form-input-focus-lt);
 }
+#refresh-icon {
+    transition: all .3s;
+}
 #sidebar.dark + #content #files_container {
   border: 1.8px solid var(--form-input-focus-dk);
 }

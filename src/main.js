@@ -192,6 +192,7 @@ if (storageBar != null) {
 const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
   const refreshButton = document.querySelector('#refresh-btn')
+  const refreshIcon = document.querySelector('#refresh-icon')
   // Load functions
   const data = JSON.parse(await invoke('read_config'))
   let remote_field = document.querySelector('#remote_path');
@@ -201,6 +202,8 @@ if (receiveButton != undefined) {
 
   // Preview files function
   refreshButton.addEventListener('click', async() => {
+    let curr_rotate = parseFloat(refreshIcon.style.rotate) || 0;
+    refreshIcon.style.rotate = `${curr_rotate+180}deg`
     if (remote_field.value.length < 1) {
       alert("The path can't be undefined");
       return 1
