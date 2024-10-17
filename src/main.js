@@ -201,13 +201,19 @@ if (receiveButton != undefined) {
 
   // Preview files function
   refreshButton.addEventListener('click', async() => {
-    console.log("va")
     if (remote_field.value.length < 1) {
       alert("The path can't be undefined");
       return 1
     }
+    let files_list = document.querySelector('#files_list');
     let res = await invoke('get_content_folder', { remoteFolder: remote_field.value })
-    console.log(res)
+    res = JSON.parse(res)
+    files_list.innerHTML = "";
+    res.forEach(folder => {
+      let folder_item = document.createElement('li')
+      folder_item.innerHTML = folder;
+      files_list.appendChild(folder_item)
+    })
   })
   
   // Download function

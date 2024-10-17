@@ -175,20 +175,27 @@ form #show_icon {
   margin: 0px auto;
   padding: .8rem .6rem;
   width: calc(80% - 1.2rem);
-  height: 5rem;
+  height: 16rem;
   border: 1.8px solid var(--form-input-focus-lt);
   border-radius: 8px;
+  overflow-y: scroll;
+}
+#files_header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 #files_container > hr {
   margin-top: 7px;
   border-color: var(--form-input-focus-lt)
 }
+#files_list {
+  margin: 1.5rem 0 0 0;
+}
 #refresh-btn {
-    position: absolute;
-    top: 6%;
-    right: 2%;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -197,7 +204,7 @@ form #show_icon {
     border-radius: 50%;
     outline: none;
     color: white;
-    font-size: 1.2em;
+    font-size: 1.4em;
     background: var(--form-input-focus-lt);
 }
 #sidebar.dark + #content #files_container {

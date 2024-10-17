@@ -31,8 +31,10 @@
         <label for="remote_path">Remote filename</label>
         <input id="remote_path" type="text" placeholder="/folder/resources/filename.txt.zst">
         <div id="files_container">
-          <h3>Files on "folder"</h3>
-          <button type="button" id="refresh-btn"><i class="fa-solid fa-refresh"></i></button>
+          <div id="files_header">
+            <h3>Files on "folder"</h3>
+            <button type="button" id="refresh-btn"><i class="fa-solid fa-refresh"></i></button>
+          </div>
           <hr>
           <ul id="files_list"></ul>
         </div>
