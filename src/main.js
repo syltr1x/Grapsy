@@ -224,13 +224,11 @@ if (receiveButton != undefined) {
   
   // Download function
   receiveButton.addEventListener('click', async() => {
-    const filePath = document.querySelector('#file_path');
-    const remotePath = document.querySelector('#remote_path');
-    if (filePath.value.length < 1) {
+    if (remote_field.value.length < 1) {
       alert("The path can't be undefined");
       return 1
     }
-    let res = await invoke('receive_file', { archivoLocal: filePath.value, archivoRemoto: remotePath.value })
+    let res = await invoke('receive_file', { archivoLocal: local_field.value, archivoRemoto: remote_field.value })
     alert(res)
   })
 }
