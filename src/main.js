@@ -208,6 +208,9 @@ if (receiveButton != undefined) {
       alert("The path can't be undefined");
       return 1
     }
+    let folder_name = document.querySelector('#folder_name');
+    let folder_path = remote_field.value.split('/')
+    folder_name.innerHTML = `files in "${folder_path[folder_path.length -1]}"`
     let files_list = document.querySelector('#files_list');
     let res = await invoke('get_content_folder', { remoteFolder: remote_field.value })
     res = JSON.parse(res)
