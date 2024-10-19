@@ -160,7 +160,7 @@ pub fn compress_file(input_path: &str) -> Result<String> {
 }
 pub fn decompress_file(input_path: &str) -> Result<String> {
     // Check if the file is compressed or not
-    if Path::new(input_path).extension().map_or(false, |ext| ext == "zst") {
+    if !Path::new(input_path).extension().map_or(false, |ext| ext == "zst") {
         return Ok("File downloaded and don't need a decompress".to_string());
     }
 
