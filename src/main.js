@@ -98,6 +98,7 @@ if (filesButton !== null) {
       fileItem.innerHTML = `[${key}] - ${files[key]}`;
       // Create remove_file button
       const fileButton = document.createElement('button');
+      fileButton.type = "button";
       fileButton.innerHTML = "Eliminar";
       // Remove file logic
       fileButton.addEventListener('click', () => {
