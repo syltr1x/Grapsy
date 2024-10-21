@@ -89,14 +89,14 @@ if (filesButton !== null) {
   // Process every file (write and store path)
   function processFile(files) {
     document.querySelector('#preview').innerHTML = "";
+    const previewBox = document.querySelector('#preview');
     Object.keys(files).forEach(key => {
-      const fileData = `<div class="file-container">
-      <div class="status">
-        <span class="status-text"><b>${key}: </b> ${files[key]}...</span>
-      </div>
-      </div>`;
-      const html = document.querySelector('#preview');
-      html.innerHTML = fileData + html.innerHTML;
+      // Create file item
+      const fileItem = document.createElement('span');
+      fileItem.id = key;
+      fileItem.classList.add('text');
+      fileItem.innerHTML = `[${key}] - ${files[key]}`;
+      previewBox.appendChild(fileItem);
     });
   }
 
