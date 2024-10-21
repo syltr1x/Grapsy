@@ -96,6 +96,16 @@ if (filesButton !== null) {
       fileItem.id = key;
       fileItem.classList.add('text');
       fileItem.innerHTML = `[${key}] - ${files[key]}`;
+      // Create remove_file button
+      const fileButton = document.createElement('button');
+      fileButton.innerHTML = "Eliminar";
+      // Remove file logic
+      fileButton.addEventListener('click', () => {
+        const deletedElement = document.getElementById(key)
+        deletedElement.remove()
+      })
+
+      fileItem.appendChild(fileButton);
       previewBox.appendChild(fileItem);
     });
   }
