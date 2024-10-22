@@ -157,7 +157,7 @@ form label {
 button, #rd-create {
   cursor: pointer;
 }
-form button:hover, #upload_btns > button:hover, #rd-create:hover {
+form > button:hover, #upload_btns > button:hover, #rd-create:hover {
   background-color: var(--form-button-hover-lt);
 }
 input,
