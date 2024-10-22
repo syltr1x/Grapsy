@@ -94,12 +94,12 @@ if (filesButton !== null) {
       // Create file item
       const fileItem = document.createElement('span');
       fileItem.id = key;
-      fileItem.classList.add('text');
+      fileItem.classList.add('file-text');
       fileItem.innerHTML = `[${key}] - ${files[key]}`;
       // Create remove_file button
       const fileButton = document.createElement('button');
       fileButton.type = "button";
-      fileButton.innerHTML = "Eliminar";
+      fileButton.innerHTML = '<i class="fa-solid fa-ban"></i>';
       // Remove file logic
       fileButton.addEventListener('click', () => {
         const deletedElement = document.getElementById(key)
