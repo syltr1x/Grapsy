@@ -64,10 +64,23 @@ a {
   margin: 0px auto; 
 }
 .file-text {
+  margin: 5px 0px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+}
+.file-text > button {
+  font-size: 22px;
+  background: none;
+  border: none;
+  outline: none;
+}
+.file-text > button > i::before {
+  transition: color .3s;
+}
+.file-text > button:hover > i::before {
+  color: #822;
 }
 #upload_btns {
   margin: 0px auto;
