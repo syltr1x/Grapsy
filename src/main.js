@@ -96,12 +96,14 @@ if (filesButton !== null) {
       fileItem.id = key;
       fileItem.classList.add('file-text');
       fileItem.innerHTML = `[${key}] - ${files[key]}`;
+
       // Create remove_file button
       const fileButton = document.createElement('button');
       fileButton.type = "button";
       fileButton.innerHTML = '<i class="fa-solid fa-ban"></i>';
       // Remove file logic
       fileButton.addEventListener('click', () => {
+        delete filesList[key]
         const deletedElement = document.getElementById(key)
         deletedElement.remove()
       })
@@ -145,7 +147,7 @@ if (filesButton !== null) {
   // Button logic if no files selected
   sendButton.addEventListener('mouseenter', (e) => {
     e.preventDefault()
-    if (sendButton.disabled) {
+    if (Object.keys(filesList).length === 0) {
       sendButton.innerHTML = '<i class="fa-solid fa-ban"></i> Please select files first';
     }
   })
@@ -156,7 +158,7 @@ if (filesButton !== null) {
   // Send files (if they're selected)
   sendButton.addEventListener('click', async() => {
     const remotePath = document.querySelector('#remote_path');
-    if (filesList === null) {alert('Error: No files to upload \n Please select files first')}
+    if (Object.keys(filesList).length === 0) {alert('Error: No files to upload \n Please select files first')}
     for (let file in filesList) {
       let response = await invoke('send_file', { archivoLocal: filesList[file] , archivoRemoto: remotePath.value})
       alert(response)
