@@ -79,7 +79,7 @@ if (show_button !== null) {
 const filesButton = document.querySelector('#file_button');
 const foldersButton = document.querySelector('#folder_button');
 const sendButton = document.querySelector('#send_files');
-let filesList = null;
+let filesList = Object;
 
 // Open file explorer to select file/s
 if (filesButton !== null) {
