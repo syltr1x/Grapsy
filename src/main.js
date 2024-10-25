@@ -230,10 +230,9 @@ if (receiveButton != undefined) {
     let folder_path = remote_folder.split('/');
     folder_name.innerHTML = `files in "${folder_path[folder_path.length -1]}"`
     let files_list = document.querySelector('#files_list');
-    files_list.innerHTML = "";
 
-    let res = await invoke('get_content_folder', { remoteFolder: remote_field.value })
-    res = JSON.parse(res)
+    files_list.innerHTML = "";
+    let res = JSON.parse(await invoke('get_content_folder',{ remoteFolder: remote_field.value }))
     res.forEach(folder => {
       let folder_item = document.createElement('li')
       folder_item.innerHTML = folder;
