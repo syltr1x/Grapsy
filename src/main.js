@@ -206,7 +206,7 @@ const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
   const refreshButton = document.querySelector('#refresh-btn')
   const refreshIcon = document.querySelector('#refresh-icon')
-  // Load functions
+  // Load configured values
   const data = JSON.parse(await invoke('read_config'))
   let remote_field = document.querySelector('#remote_path');
   let local_field = document.querySelector('#local_path');
@@ -222,7 +222,12 @@ if (receiveButton != undefined) {
       return 1
     }
     let folder_name = document.querySelector('#folder_name');
-    let folder_path = remote_field.value.split('/')
+    // If remote_field ends with "/", remove it
+    let remote_folder = remote_field.value
+      remote_folder = remote_folder.endsWith("/") ? 
+      remote_folder.slice(0, -1) : 
+      remote_folder;
+    let folder_path = remote_folder.split('/');
     folder_name.innerHTML = `files in "${folder_path[folder_path.length -1]}"`
     let files_list = document.querySelector('#files_list');
     files_list.innerHTML = "";
