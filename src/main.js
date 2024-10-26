@@ -204,43 +204,50 @@ if (storageBar != null) {
 // --- Download file from server ---
 const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
-  const refreshButton = document.querySelector('#refresh-btn')
-  const refreshIcon = document.querySelector('#refresh-icon')
+  let previousFolder = null;
+  const refreshButton = document.querySelector('#refresh-btn');
+  const refreshIcon = document.querySelector('#refresh-icon');
   // Load configured values
-  const data = JSON.parse(await invoke('read_config'))
+  const data = JSON.parse(await invoke('read_config'));
   let remote_field = document.querySelector('#remote_path');
   let local_field = document.querySelector('#local_path');
-  remote_field.value = data.remote_path
-  local_field.value = data.local_path
+  remote_field.value = data.remote_path;
+  local_field.value = data.local_path;
 
   // Preview files function
   refreshButton.addEventListener('click', async() => {
-    let curr_rotate = parseFloat(refreshIcon.style.rotate) || 0;
-    refreshIcon.style.rotate = `${curr_rotate+180}deg`
-    if (remote_field.value.length < 1) {
-      alert("The path can't be undefined");
-      return 1
-    }
+    // - Set folder name in header of box files
     let folder_name = document.querySelector('#folder_name');
     // If remote_field ends with "/", remove it
-    let remote_folder = remote_field.value
+    let remote_folder = remote_field.value;
       remote_folder = remote_folder.endsWith("/") ? 
-      remote_folder.slice(0, -1) : 
-      remote_folder;
+      remote_folder.slice(0, -1) : remote_folder;
+    // ! very important check (prevent stupid fetchs)
+    if (previousFolder === remote_folder) { return 0; }
+    previousFolder = remote_folder;
     let folder_path = remote_folder.split('/');
-    folder_name.innerHTML = `files in "${folder_path[folder_path.length -1]}"`
+    folder_name.innerHTML = `files in "${folder_path[folder_path.length -1]}"`;
+    
+    // - Get new files list
     let files_list = document.querySelector('#files_list');
-
     files_list.innerHTML = "";
     let res = JSON.parse(await invoke('get_content_folder',{ remoteFolder: remote_field.value }))
     res.forEach(folder => {
-      let folder_item = document.createElement('li')
+      let folder_item = document.createElement('li');
       folder_item.innerHTML = folder;
-      files_list.appendChild(folder_item)
+      files_list.appendChild(folder_item);
     })
+
+    // - Rotate search button
+    let curr_rotate = parseFloat(refreshIcon.style.rotate) || 0;
+    refreshIcon.style.rotate = `${curr_rotate+180}deg`;
+    if (remote_field.value.length < 1) {
+      alert("The path can't be undefined");
+      return 1;
+    }
   })
   
-  // Download function
+  // - Download function
   receiveButton.addEventListener('click', async() => {
     if (remote_field.value.length < 1) {
       alert("The path can't be undefined");
