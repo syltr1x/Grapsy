@@ -57,23 +57,6 @@ darkModeButton.addEventListener('click', () => {
   }
 })
 
-// --- Toggle Password Visibility ---
-const show_button = document.querySelector('#show_icon');
-if (show_button !== null) {
-  const password_field = document.querySelector('#password');
-
-  show_button.addEventListener('click', () => {
-    if (show_button.classList.contains('fa-eye')) {
-      show_button.classList.remove('fa-eye')
-      show_button.classList.add('fa-eye-slash')
-      password_field.setAttribute('type', 'text')
-    } else {
-      show_button.classList.remove('fa-eye-slash')
-      show_button.classList.add('fa-eye')
-      password_field.setAttribute('type', 'password')
-    }
-  })
-}
 
 // --- Select Files ---
 const filesButton = document.querySelector('#file_button');
@@ -280,7 +263,9 @@ if (updconfigButton != undefined) {
 // -- Authenticate user in server ---
 const newkeyButton = document.querySelector('#create_key')
 if (newkeyButton != undefined) {
-  // Charge configured values
+  const password = document.querySelector('#password');
+  const show_button = document.querySelector('#show_icon');
+  //- Charge configured values
   async function fill_values() {
     const user_field = document.querySelector('#username');
     const host_field = document.querySelector('#address');
@@ -291,14 +276,25 @@ if (newkeyButton != undefined) {
     host_field.value = data.host;
     port_field.value = data.port;
   }
-  addEventListener('DOMContentLoaded', () => {
-    fill_values()
-  })
+  addEventListener('DOMContentLoaded', () => { fill_values() });
 
+  // - Toggle Password Visibility
+  show_button.addEventListener('click', () => {
+    if (show_button.classList.contains('fa-eye')) {
+      show_button.classList.remove('fa-eye')
+      show_button.classList.add('fa-eye-slash')
+      password.setAttribute('type', 'text')
+    } else {
+      show_button.classList.remove('fa-eye-slash')
+      show_button.classList.add('fa-eye')
+      password.setAttribute('type', 'password')
+    }
+  });
+
+  // - Send key to the server
   newkeyButton.addEventListener('click', async() => {
     const description = document.querySelector('#description').value;
     const username = document.querySelector('#username').value;
-    const password = document.querySelector('#password').value;
     const address = document.querySelector('#address').value;
     const port = document.querySelector('#port').value;
 
