@@ -83,19 +83,20 @@ let filesList = Object;
 
 // Open file explorer to select file/s
 if (filesButton !== null) {
-  const data = JSON.parse(await invoke('read_config'))
+  const config = JSON.parse(await invoke('read_config'))
   let remote_field = document.querySelector('#remote_path');
-  remote_field.value = data.remote_path
+  remote_field.value = config.remote_path
+
   // Process every file (write and store path)
   function processFile(files) {
     document.querySelector('#preview').innerHTML = "";
     const previewBox = document.querySelector('#preview');
-    Object.keys(files).forEach(key => {
+    Object.keys(files).forEach(file => {
       // Create file item
       const fileItem = document.createElement('span');
-      fileItem.id = key;
+      fileItem.id = file;
       fileItem.classList.add('file-text');
-      fileItem.innerHTML = `[${key}] - ${files[key]}`;
+      fileItem.innerHTML = `[${file}] - ${files[file]}`;
 
       // Create remove_file button
       const fileButton = document.createElement('button');
@@ -103,48 +104,38 @@ if (filesButton !== null) {
       fileButton.innerHTML = '<i class="fa-solid fa-ban"></i>';
       // Remove file logic
       fileButton.addEventListener('click', () => {
-        delete filesList[key]
-        const deletedElement = document.getElementById(key)
-        deletedElement.remove()
-      })
+        delete filesList[file];
+        document.getElementById(file).remove();
+      });
 
       fileItem.appendChild(fileButton);
       previewBox.appendChild(fileItem);
     });
   }
 
-  // Process files
+  // - Process files
   filesButton.addEventListener('click', async () => {
     const selectedFilePath = await open({
-      title: "Select file/s",
-      defaultPath: data.local_path,
-      multiple: true
+      title: "Select file/s", defaultPath: data.local_path, multiple: true
     })
-
     if (selectedFilePath) {
       processFile(selectedFilePath);
       filesList = selectedFilePath;
-      sendButton.disabled = false;
     }
   });
 
-  // Process folders
+  // - Process folders
   foldersButton.addEventListener('click', async() => {
     const selectedFolderPath = await open({
-      title: "Select folder/s",
-      defaultPath: data.local_path,
-      directory: true,
-      multiple: true
+      title: "Select folder/s", defaultPath: data.local_path, directory: true, multiple: true
     })
-
     if (selectedFolderPath) {
       processFile(selectedFolderPath);
       filesList = selectedFolderPath;
-      sendButton.disabled = false;
     }
   });
 
-  // Button logic if no files selected
+  // - Button logic if no files selected
   sendButton.addEventListener('mouseenter', (e) => {
     e.preventDefault()
     if (Object.keys(filesList).length === 0) {
@@ -155,12 +146,14 @@ if (filesButton !== null) {
     e.preventDefault()
     sendButton.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Upload Files';
   })
-  // Send files (if they're selected)
+  // - Send files (if they're selected)
   sendButton.addEventListener('click', async() => {
-    const remotePath = document.querySelector('#remote_path');
-    if (Object.keys(filesList).length === 0) {alert('Error: No files to upload \n Please select files first')}
+    if (Object.keys(filesList).length === 0) {
+      alert('Error: No files to upload \n Please select files first')
+      return 1;
+    }
     for (let file in filesList) {
-      let response = await invoke('send_file', { archivoLocal: filesList[file] , archivoRemoto: remotePath.value})
+      let response = await invoke('send_file', { archivoLocal: filesList[file] , archivoRemoto: remote_field.value})
       alert(response)
     }
   })
