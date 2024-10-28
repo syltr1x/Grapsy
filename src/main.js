@@ -14,7 +14,6 @@ if (menu_status && menu_status === "open") {
   menuButton.style.rotate = '0deg'
 }
 const darkModeButton = document.querySelector('#toggle_darkmode');
-
 let dark_mode = localStorage.getItem("dark_mode");
 if (dark_mode && dark_mode === "on") {
   darkModeButton.classList.add('fa-moon')
@@ -24,9 +23,8 @@ if (dark_mode && dark_mode === "on") {
   darkModeButton.classList.add('fa-sun')
 }
 addEventListener('DOMContentLoaded', async() => {
-  const body = document.querySelector('body');
-  body.classList.remove('charge')
-})
+  document.querySelector('body').classList.remove('charge');
+});
 // --- Toggle Sidebar ---
 menuButton.addEventListener('click', () => {
   if (menu.classList.contains('close')) {
@@ -242,9 +240,7 @@ if (updconfigButton != undefined) {
     local_field.value = data.local_path;
     remote_field.value = data.remote_path;
   }
-  addEventListener('DOMContentLoaded', () => {
-    fill_values()
-  })
+  addEventListener('DOMContentLoaded', () => { fill_values() })
   updconfigButton.addEventListener('click', async() => {
     const user = document.querySelector('#server_user').value;
     const address = document.querySelector('#server_address').value;
