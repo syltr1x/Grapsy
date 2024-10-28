@@ -13,7 +13,6 @@ if (menu_status && menu_status === "open") {
   menu.classList.add('close');
   menuButton.style.rotate = '0deg'
 }
-const contenido = document.querySelector('#content');
 const darkModeButton = document.querySelector('#toggle_darkmode');
 
 let dark_mode = localStorage.getItem("dark_mode");
@@ -39,7 +38,7 @@ menuButton.addEventListener('click', () => {
     menuButton.style.rotate = '0deg';
     localStorage.setItem("menu_status", "close")
   }
-})
+});
 
 // --- Toggle Dark Mode ---
 darkModeButton.addEventListener('click', () => {
@@ -55,20 +54,17 @@ darkModeButton.addEventListener('click', () => {
     menu.classList.add('dark')
     localStorage.setItem("dark_mode", "on")
   }
-})
-
+});
 
 // --- Select Files ---
 const filesButton = document.querySelector('#file_button');
-const foldersButton = document.querySelector('#folder_button');
-const sendButton = document.querySelector('#send_files');
-let filesList = Object;
-
-// Open file explorer to select file/s
 if (filesButton !== null) {
-  const config = JSON.parse(await invoke('read_config'))
+  let filesList = Object;
+  const foldersButton = document.querySelector('#folder_button');
+  const sendButton = document.querySelector('#send_files');
+  const config = JSON.parse(await invoke('read_config'));
   let remote_field = document.querySelector('#remote_path');
-  remote_field.value = config.remote_path
+  remote_field.value = config.remote_path;
 
   // Process every file (write and store path)
   function processFile(files) {
