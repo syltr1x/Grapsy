@@ -212,6 +212,7 @@ if (receiveButton != undefined) {
     }
   })
   
+  addEventListener("keypress", (e) => { if (e.key === 'Enter') { receiveButton.click() }});
   // - Download function
   receiveButton.addEventListener('click', async() => {
     if (remote_field.value.length < 1) {
