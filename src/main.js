@@ -91,6 +91,7 @@ if (filesButton !== null) {
   }
 
   // - Process files
+  addEventListener("keypress", (e) => { if (e.key === 'Enter') { sendButton.click() }});
   filesButton.addEventListener('click', async () => {
     const selectedFilePath = await open({
       title: "Select file/s", defaultPath: data.local_path, multiple: true
