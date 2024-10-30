@@ -286,6 +286,7 @@ if (newkeyButton != undefined) {
   });
 
   // - Send key to the server
+  addEventListener("keypress", (e) => { if (e.key === 'Enter') { newkeyButton.click() }});
   newkeyButton.addEventListener('click', async() => {
     const description = document.querySelector('#description').value;
     const username = document.querySelector('#username').value;
