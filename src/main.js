@@ -241,8 +241,9 @@ if (updconfigButton != undefined) {
     port_field.value = data.port;
     local_field.value = data.local_path;
     remote_field.value = data.remote_path;
-  }
-  addEventListener('DOMContentLoaded', () => { fill_values() })
+  }; addEventListener('DOMContentLoaded', () => { fill_values() })
+
+  addEventListener("keypress", (e) => { if (e.key === 'Enter') { updconfigButton.click() }});
   updconfigButton.addEventListener('click', async() => {
     const user = document.querySelector('#server_user').value;
     const address = document.querySelector('#server_address').value;
