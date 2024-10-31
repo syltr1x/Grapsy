@@ -212,8 +212,8 @@ if (receiveButton != undefined) {
     }
   })
   
-  addEventListener("keypress", (e) => { if (e.key === 'Enter') { receiveButton.click() }});
   // - Download function
+  addEventListener("keypress", (e) => { if (e.key === 'Enter') { receiveButton.click() }});
   receiveButton.addEventListener('click', async() => {
     if (remote_field.value.length < 1) {
       alert("The path can't be undefined");
