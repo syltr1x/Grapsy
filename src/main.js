@@ -91,7 +91,6 @@ if (filesButton !== null) {
   }
 
   // - Process files
-  addEventListener("keypress", (e) => { if (e.key === 'Enter') { sendButton.click() }});
   filesButton.addEventListener('click', async () => {
     const selectedFilePath = await open({
       title: "Select file/s", defaultPath: data.local_path, multiple: true
@@ -125,6 +124,7 @@ if (filesButton !== null) {
     sendButton.innerHTML = '<i class="fa-solid fa-arrow-up"></i> Upload Files';
   })
   // - Send files (if they're selected)
+  addEventListener("keypress", (e) => { if (e.key === 'Enter') { sendButton.click() }});
   sendButton.addEventListener('click', async() => {
     if (Object.keys(filesList).length === 0) {
       alert('Error: No files to upload \n Please select files first')
