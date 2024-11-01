@@ -136,36 +136,6 @@ if (filesButton !== null) {
     }
   })
 }
-
-// --- Get server info (for info.html)
-const storageBar = document.querySelector('#storage_bar')
-if (storageBar != null) {
-  async function get_server_info() {
-    let server
-    try {
-      server = JSON.parse(await invoke('get_server_info'))
-    } catch {
-      alert(response)
-      return 1
-    }
-
-    if (server.address != "0.0.0.0") {
-      document.querySelector('#address').innerHTML = `Address: ${server.address}:${server.port}`;
-    }
-    if (server.status) { document.querySelector('#status').innerHTML = "Server status: On"; }
-    if (server.authenticated) {
-      let storage_width = Math.round(server.storage.used_size*100/server.storage.total_size)
-      document.querySelector('#storage').innerHTML = `Server storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
-      document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}%`);
-      document.querySelector('#key').innerHTML = "Server key status: Authenticated";
-      document.querySelector('#warn').hidden = true;
-      document.querySelector('#rd-create').hidden = true;
-    }
-  }
-  const checkKey = await invoke('check_rsa_key')
-  if (checkKey) { get_server_info() }
-}
-
 // --- Download file from server ---
 const receiveButton = document.querySelector('#receive_file')
 if (receiveButton != undefined) {
@@ -223,7 +193,6 @@ if (receiveButton != undefined) {
     alert(res)
   })
 }
-
 // --- Update config ---
 const updconfigButton = document.querySelector('#write_config')
 if (updconfigButton != undefined) {
@@ -297,4 +266,32 @@ if (newkeyButton != undefined) {
     let res = await invoke('send_key', { desc: description, user: username, password: password, address: address, port: port})
     alert(res)
   })
+}
+// --- Get server info (for info.html)
+const storageBar = document.querySelector('#storage_bar')
+if (storageBar != null) {
+  async function get_server_info() {
+    let server
+    try {
+      server = JSON.parse(await invoke('get_server_info'))
+    } catch {
+      alert(response)
+      return 1
+    }
+
+    if (server.address != "0.0.0.0") {
+      document.querySelector('#address').innerHTML = `Address: ${server.address}:${server.port}`;
+    }
+    if (server.status) { document.querySelector('#status').innerHTML = "Server status: On"; }
+    if (server.authenticated) {
+      let storage_width = Math.round(server.storage.used_size*100/server.storage.total_size)
+      document.querySelector('#storage').innerHTML = `Server storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
+      document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}%`);
+      document.querySelector('#key').innerHTML = "Server key status: Authenticated";
+      document.querySelector('#warn').hidden = true;
+      document.querySelector('#rd-create').hidden = true;
+    }
+  }
+  const checkKey = await invoke('check_rsa_key')
+  if (checkKey) { get_server_info() }
 }
