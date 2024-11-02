@@ -227,6 +227,61 @@ pub fn send_file(input_path: &str, remote_path: &str) -> Result<String> {
         Ok("Err: File name not accessible".to_string())
     }
 }
+pub fn validate_file_type(file_path: &str) -> Result<bool> {
+    let home_dir = dirs::home_dir().expect("/");
+    let config = read_config()?;
+    let address = config.host;
+    let port = config.port;
+
+    // Try resolve hostname if it is
+    let sv_address = match format!("{}:{}", address, port).to_socket_addrs() {
+        Ok(mut addrs) => {
+            if let Some(sv_address) = addrs.next() {
+                sv_address.to_string()
+            } else {
+                format!("{}:{}", address, port)
+            }
+        }
+        Err(_) => format!("{}:{}", address, port),
+    };
+
+    // Check if server is ON
+    if let Err(_) = TcpStream::connect(&sv_address) {
+        return Ok(false);
+    }
+    
+    // Check if can login with key file
+    let tcp = TcpStream::connect(&sv_address).unwrap();
+    let mut sess = Session::new().unwrap();
+    sess.set_tcp_stream(tcp);
+    sess.handshake().unwrap();
+
+    if !Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())).exists() {
+        return Ok(false)
+    }
+    
+    sess.userauth_pubkey_file(
+        &config.user,
+        None,
+        Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
+        None,
+    ).unwrap();
+
+    // Compare file_name parameter in server
+    if sess.authenticated() {
+        let mut channel = sess.channel_session().unwrap();
+        channel.exec(&format!("test -f {}", file_path)).unwrap();
+        let exit_code = channel.exit_status().unwrap();
+
+        if exit_code == 0 {
+            return Ok(true)
+        } else {
+            return Ok(false)
+        }
+    } else {
+        return Ok(false)
+    }
+}
 
 pub fn get_content_folder(remote_folder: &str) -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
