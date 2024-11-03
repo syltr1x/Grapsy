@@ -61,10 +61,15 @@ fn check_rsa_key() -> Result<bool, bool> {
     let key_exist = cian::check_rsa_key().unwrap();
     Ok(key_exist)
 }
+#[tauri::command]
+fn is_file(file_path: &str) -> Result<bool, bool> {
+    let is_file = cian::validate_file_type(&file_path).unwrap();
+    Ok(is_file)
+}
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![send_file, receive_file, read_config, write_config, send_key, get_server_info, check_rsa_key, get_content_folder])
+    .invoke_handler(tauri::generate_handler![send_file, receive_file, read_config, write_config, send_key, get_server_info, check_rsa_key, get_content_folder, is_file])
     .run(tauri::generate_context!())
     .expect("failed to run app");
 }
