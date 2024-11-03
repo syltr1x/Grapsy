@@ -190,7 +190,7 @@ if (receiveButton != undefined) {
       return 1
     }
     let check_file = await invoke('is_file', { filePath : remote_field.value })
-    if (check_file) {alert("Error: Current path is not a file."); return 1}
+    if (!check_file) {alert("Error: Current path is not a file."); return 1}
     let res = await invoke('receive_file', { archivoLocal: local_field.value, archivoRemoto: remote_field.value })
     alert(res)
   })

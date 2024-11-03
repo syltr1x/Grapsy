@@ -270,10 +270,11 @@ pub fn validate_file_type(file_path: &str) -> Result<bool> {
     // Compare file_name parameter in server
     if sess.authenticated() {
         let mut channel = sess.channel_session().unwrap();
-        channel.exec(&format!("test -f {}", file_path)).unwrap();
-        let exit_code = channel.exit_status().unwrap();
+        channel.exec(&format!("stat -c %F {}", file_path)).unwrap();
+        let mut output = String::new();
+        channel.read_to_string(&mut output).unwrap();
 
-        if exit_code == 0 {
+        if output.split_whitespace().count() > 1 {
             return Ok(true)
         } else {
             return Ok(false)
