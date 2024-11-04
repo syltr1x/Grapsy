@@ -273,13 +273,9 @@ if (newkeyButton != undefined) {
 const storageBar = document.querySelector('#storage_bar')
 if (storageBar != null) {
   async function get_server_info() {
-    let server
-    try {
-      server = JSON.parse(await invoke('get_server_info'))
-    } catch {
-      alert(response)
-      return 1
-    }
+    let server = await invoke('get_server_info') 
+    try { server = JSON.parse(server) } 
+    catch { alert(server); return 1 }
 
     if (server.address != "0.0.0.0") {
       document.querySelector('#address').innerHTML = `Address: ${server.address}:${server.port}`;
