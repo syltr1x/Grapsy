@@ -524,12 +524,15 @@ pub fn server_info() -> Result<String> {
         return Ok("Err: key file not found".to_string())
     }
     
-    sess.userauth_pubkey_file(
+    match sess.userauth_pubkey_file(
         &config.user,
         None,
         Path::new(&format!("{}/.ssh/id_rsa", home_dir.display())),
         None,
-    ).unwrap();
+    ) {
+        Ok(()) => {},
+        Err(_e) => return Ok("Error: can't login in the server, please check the key".to_string()),
+    };
 
     auth = sess.authenticated();
 
