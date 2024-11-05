@@ -547,10 +547,42 @@ pub fn server_info() -> Result<String> {
         channel.wait_close().unwrap();
 
         for line in output.lines() {
-            if !line.contains("Filesystem") && !line.trim().is_empty() {
+            if line.contains("/") && !line.trim().is_empty() {
                 let fields: Vec<&str> = line.split_whitespace().collect();
-                total_size = fields[1][..fields[1].len() - 1].parse().unwrap();
-                used_size = fields[2][..fields[2].len() - 1].parse().unwrap();
+                total_size = match fields[1].chars().last() {
+                    Some('M') => {
+                        let number: f64 = fields[1][..fields[1].len()-1].parse().unwrap_or(0.0);
+                        (number / 1024.0) as u16
+                    }
+                    Some('G') => {
+                        let number: f64 = fields[1][..fields[1].len()-1].parse().unwrap_or(0.0);
+                        number as u16
+                    }
+                    Some('T') => {
+                        let number: f64 = fields[1][..fields[1].len()-1].parse().unwrap_or(0.0);
+                        (number * 1024.0) as u16
+                    }
+                    _ => {
+                        0
+                    }
+                };
+                used_size = match fields[2].chars().last() {
+                    Some('M') => {
+                        let number: f64 = fields[2][..fields[2].len()-1].parse().unwrap_or(0.0);
+                        (number / 1024.0) as u16
+                    }
+                    Some('G') => {
+                        let number: f64 = fields[2][..fields[2].len()-1].parse().unwrap_or(0.0);
+                        number as u16
+                    }
+                    Some('T') => {
+                        let number: f64 = fields[2][..fields[2].len()-1].parse().unwrap_or(0.0);
+                        (number * 1024.0) as u16
+                    }
+                    _ => {
+                        0
+                    }
+                };
             }
         }
         storage = Storage { total_size, used_size }
