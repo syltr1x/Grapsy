@@ -265,7 +265,7 @@ if (newkeyButton != undefined) {
     const address = document.querySelector('#address').value;
     const port = document.querySelector('#port').value;
 
-    let res = await invoke('send_key', { desc: description, user: username, password: password, address: address, port: port})
+    let res = await invoke('send_key', { desc: description, user: username, password: password.value, address: address, port: port})
     alert(res)
   })
 }
