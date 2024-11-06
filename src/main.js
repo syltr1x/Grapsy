@@ -283,7 +283,7 @@ if (storageBar != null) {
     if (server.status) { document.querySelector('#status').innerHTML = "Server status: On"; }
     if (server.authenticated) {
       let storage_width = Math.round(server.storage.used_size*100/server.storage.total_size)
-      document.querySelector('#storage').innerHTML = `Server storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
+      document.querySelector('#storage').innerHTML = `Used storage: ${server.storage.used_size}GB/${server.storage.total_size}GB`;
       document.querySelector('#storage_bar').style.setProperty('--storage-width', `${storage_width}%`);
       document.querySelector('#key').innerHTML = "Server key status: Authenticated";
       document.querySelector('#warn').hidden = true;
