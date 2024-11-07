@@ -3,5 +3,5 @@ A rust-based CLI app for compress and transfer files to server using SCP (Secure
 
 ### Requisites to v0.6:
 - [x] Add Grapsy icons
-- [ ] Server side CLI
+- [ x ] Server side CLI
 - [ ] Add manual (user guide)
