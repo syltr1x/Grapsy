@@ -7,7 +7,7 @@ A rust-based CLI app for compress and transfer files to server using SCP (Secure
 - [ ] Add manual (user guide)
 
 ### Install Grapsy CLI in your server 
-```
-sudo curl -s https://raw.githubusercontent.com/syltr1x/Grapsy/refs/heads/main/grapsy.sh -o /usr/bin/grapsysudo
+```bash
+sudo curl -s https://raw.githubusercontent.com/syltr1x/Grapsy/refs/heads/main/grapsy.sh -o /usr/bin/grapsy
 sudo chmod +x /usr/bin/grapsy
 ```
