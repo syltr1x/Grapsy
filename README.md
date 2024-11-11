@@ -1,13 +1,5 @@
-## Grapsy v0.5 (New release🎉)
-A rust-based CLI app for compress and transfer files to server using SCP (Secure Copy Protocol)
+## Grapsy v0.6 (New release🎉)
+An Rust-based application for uploading and downloading your files to a server using SCP (Secure Copy Protocol) and all connections encrypted.
 
-### Requisites to v0.6:
-- [x] Add Grapsy icons
-- [x] Server side CLI
-- [x] Add manual (user guide)
-
-### Install Grapsy CLI in your server 
-```bash
-sudo curl -s https://raw.githubusercontent.com/syltr1x/Grapsy/refs/heads/main/grapsy.sh -o /usr/bin/grapsy
-sudo chmod +x /usr/bin/grapsy
-```
+## ❗ Now open to public
+See new release [here](https://github.com/syltr1x/Grapsy/releases/tag/v0.6.0)
