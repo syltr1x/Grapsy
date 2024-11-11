@@ -4,7 +4,7 @@ A rust-based CLI app for compress and transfer files to server using SCP (Secure
 ### Requisites to v0.6:
 - [x] Add Grapsy icons
 - [x] Server side CLI
-- [ ] Add manual (user guide)
+- [x] Add manual (user guide)
 
 ### Install Grapsy CLI in your server 
 ```bash
