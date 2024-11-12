@@ -39,7 +39,7 @@ function main() {
 	noip_startup=$(systemctl is-enabled noip)
 	
 	# Users list
-	users_list=$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd)
+	users_list=$(awk -F: '$3 >= 1000 && $1 != "nobody" && $6 != "/" {print $1}' /etc/passwd)
 
 	# SSH info
 	if [ -d "$HOME/.ssh" ]; then
