@@ -3,6 +3,20 @@
 version = 3
 
 [[package]]
+name = "Grapsy"
+version = "0.6.0"
+dependencies = [
+ "dirs",
+ "serde",
+ "serde_json",
+ "ssh2",
+ "tar",
+ "tauri",
+ "tauri-build",
+ "zstd",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -304,20 +318,6 @@ dependencies = [
  "num-traits",
  "serde",
  "windows-targets 0.52.6",
-]
-
-[[package]]
-name = "cian"
-version = "0.0.0"
-dependencies = [
- "dirs",
- "serde",
- "serde_json",
- "ssh2",
- "tar",
- "tauri",
- "tauri-build",
- "zstd",
 ]
 
 [[package]]
