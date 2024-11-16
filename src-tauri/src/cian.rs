@@ -40,7 +40,7 @@ pub struct Storage {
 }
 
 fn read_config() -> Result<Config> {
-    let file = fs::File::open("cian.conf")?;
+    let file = fs::File::open("grapsy.conf")?;
     let reader = BufReader::new(file);
 
     let mut user = String::new();
@@ -67,7 +67,7 @@ fn read_config() -> Result<Config> {
     Ok(config)
 }
 pub fn read_config_json() -> Result<String> {
-    let file = fs::File::open("cian.conf")?;
+    let file = fs::File::open("grapsy.conf")?;
     let reader = BufReader::new(file);
 
     let mut user = String::new();
@@ -102,7 +102,7 @@ pub fn read_config_json() -> Result<String> {
     Ok(config_json)
 }
 pub fn write_config(user: &str, host: &str, port: &str, local_folder: &str, remote_folder: &str) -> Result<String> {
-    let mut file = fs::File::create("cian.conf")?;
+    let mut file = fs::File::create("grapsy.conf")?;
     file.write_all(format!("user={}\nhost={}\nport={}\nlocal_path={}\nremote_path={}",
         user, host, port, local_folder, remote_folder).as_bytes())?;
 
