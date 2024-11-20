@@ -40,6 +40,8 @@ function main() {
 	
 	# Users list
 	users_list=$(awk -F: '$3 >= 1000 && $1 != "nobody" && $6 != "/" {print $1}' /etc/passwd)
+	# Local Ip
+	priv_ip=$(ip a show | grep 'inet ' | awk '{ print $2 }' | cut -d/ -f1 | tail -1)
 
 	# SSH info
 	if [ -d "$HOME/.ssh" ]; then
@@ -52,7 +54,9 @@ function main() {
 	# Httpd info
 	httpd_dirs=$(grep -oP '<Directory "\K[^"]+' /etc/httpd/conf/httpd.conf 2>/dev/null || echo "no httpd dirs configured")
 
-	echo -e "-- Services Startup --"
+	echo -e "-- Network Info --"
+	echo -e "Private IP: $priv_ip"
+	echo -e "\n-- Services Startup --"
 	echo -e "httpd service status: $(colorize_service $httpd_startup)"
 	echo -e "noip service status: $(colorize_service $noip_startup)"
 	echo -e "\n-- Services Status --"
