@@ -78,7 +78,7 @@ if (filesButton !== null) {
       // Create remove_file button
       const fileButton = document.createElement('button');
       fileButton.type = "button";
-      fileButton.innerHTML = '<i class="fa-solid fa-ban"></i>';
+      fileButton.innerHTML = '<i class="fa-solid fa-trash"></i>';
       // Remove file logic
       fileButton.addEventListener('click', () => {
         delete filesList[file];
@@ -93,7 +93,7 @@ if (filesButton !== null) {
   // - Process files
   filesButton.addEventListener('click', async () => {
     const selectedFilePath = await open({
-      title: "Select file/s", defaultPath: data.local_path, multiple: true
+      title: "Select file/s", defaultPath: config.local_path, multiple: true
     })
     if (selectedFilePath) {
       processFile(selectedFilePath);
@@ -104,7 +104,7 @@ if (filesButton !== null) {
   // - Process folders
   foldersButton.addEventListener('click', async() => {
     const selectedFolderPath = await open({
-      title: "Select folder/s", defaultPath: data.local_path, directory: true, multiple: true
+      title: "Select folder/s", defaultPath: config.local_path, directory: true, multiple: true
     })
     if (selectedFolderPath) {
       processFile(selectedFolderPath);
