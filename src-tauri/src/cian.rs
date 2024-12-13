@@ -482,6 +482,36 @@ pub fn check_rsa_key() -> Result<bool> {
     }
 }
 
+pub fn check_server_status() -> Result<bool> {
+    let config = read_config()?;
+    let address = &config.host;
+    let port = &config.port;
+
+    let sv_address = match format!("{}:{}", address, port).to_socket_addrs() {
+        Ok(mut addrs) => {
+            if let Some(sv_address) = addrs.next() {
+                sv_address
+            } else {
+                format!("{}:{}", address, port).parse().unwrap()
+            }
+        }
+        Err(_) => return Ok(false),
+    };
+
+    let timeout = Duration::from_millis(500);
+    let result = TcpStream::connect_timeout(&sv_address ,timeout);
+
+    match result {
+        Ok(_) => {
+            println!("Conexión exitosa a {}", address);
+            return Ok(true)
+        }
+        Err(_) => {
+            return Ok(false)
+        }
+    };
+}
+
 pub fn server_info() -> Result<String> {
     let home_dir = dirs::home_dir().expect("Error msg");
     let auth: bool;

@@ -291,5 +291,6 @@ if (storageBar != null) {
     }
   }
   const checkKey = await invoke('check_rsa_key')
-  if (checkKey) { get_server_info() }
+	const checkServerStatus = await invoke ('check_server_status');
+  if (checkKey && checkServerStatus) { get_server_info() }
 }
